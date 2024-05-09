@@ -46,6 +46,11 @@ function Sidebar({openSidebarToggle, OpenSideBar}) {
                         <BsListCheck className='icon'/> Quantity Product
                 </li>
             </Link>
+            <Link to="/productImage">
+                <li className='sidebar-list-item'>
+                        <BsMenuButtonWideFill className='icon'/> Product Image
+                </li>
+            </Link>
             <Link to="/login">
                 <li className='sidebar-list-item'>
                         <BsMenuButtonWideFill className='icon'/> Reports

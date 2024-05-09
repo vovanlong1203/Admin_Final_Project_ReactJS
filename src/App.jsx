@@ -16,6 +16,7 @@ import { login } from './api/service'
 import { checkAuth } from './utils/auth'; 
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
+import ProductImage from './pages/ProductImage'
 
 function App() {
 
@@ -26,19 +27,37 @@ function App() {
     setOpenSidebarToggle(!openSidebarToggle)
   }
 
+  // const handleLogin = async (data, navigate) => {
+  //   try {
+  //     const response = await login(data)
+  //     console.log(response)
+  //     localStorage.setItem('accessToken', response['access_token']);
+  //     setIsLoggedIn(true);
+  //     navigate('/home');
+  //     toast.success("login successfully!")
+  //   } catch (error) {
+  //     console.error('Error during login:', error);
+  //     toast.error("login failed!")
+  //   }
+  // }
+
   const handleLogin = async (data, navigate) => {
     try {
-      const response = await login(data)
-      console.log(response)
-      localStorage.setItem('accessToken', response['access_token']);
-      setIsLoggedIn(true);
-      navigate('/home');
-      toast.success("login successfully!")
+      const response = await login(data);
+      console.log(response);
+      if (response && response.access_token) {
+        localStorage.setItem('accessToken', response.access_token);
+        setIsLoggedIn(true);
+        navigate('/home');
+        toast.success("Login successfully!");
+      } else {
+        throw new Error("Access token not found in response");
+      }
     } catch (error) {
       console.error('Error during login:', error);
-      toast.error("login failed!")
+      toast.error("Login failed!");
     }
-  }
+  };
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
     setIsLoggedIn(false);
@@ -77,6 +96,7 @@ function App() {
                 <Route path="/category" element={<Category />} />
                 <Route path="/size" element={<Size />} />
                 <Route path="/quantityProduct" element={<ProductSize />} />
+                <Route path="/productImage" element={<ProductImage />} />
               </Routes>
             </div>
           </>
