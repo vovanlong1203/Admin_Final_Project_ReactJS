@@ -49,7 +49,7 @@ function Promotion() {
             await addPromotion(newPromotion)
             fetchPromotion()
             setShowAddForm(false)
-            localStorage.setItem('promotions', JSON.stringify(promotions));
+            localStorage.setItem('promotions', JSON.stringify(promotion));
             toast.success("add item successfully!")
         } catch(error) {
             console.error('Error updating promotion:', error);
@@ -86,7 +86,7 @@ function Promotion() {
     
             setPromotion(updatedPromotionList);
             fetchPromotion()
-            localStorage.setItem('promotions', JSON.stringify(promotions));
+            localStorage.setItem('promotions', JSON.stringify(promotion));
             toast.success("update successfully!")
         } catch(error) {
             console.error('Error updating promotion:', error);
@@ -98,7 +98,7 @@ function Promotion() {
         try {
             await deletePromtion(id)
             fetchPromotion()
-            localStorage.setItem('promotions', JSON.stringify(promotions));
+            localStorage.setItem('promotions', JSON.stringify(promotion));
             toast.success("delete successfully!")
         } catch (error) {
             console.log("error: ", error)

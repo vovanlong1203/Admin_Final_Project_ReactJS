@@ -30,6 +30,7 @@ function Product() {
       const productData = await getProducts()
       console.log("product: ", productData)
       setProduct(productData)
+      localStorage.setItem("products", JSON.stringify(productData))
     } catch (error) {
       console.log(error)
     }
@@ -50,6 +51,7 @@ function Product() {
       console.log("getCateogries: ", productData)
 
       setCategories(productData)
+      localStorage.setItem("categories", JSON.stringify(productData))
     } catch (error) {
       console.log(error)
     }
@@ -59,6 +61,7 @@ function Product() {
       const sizeData = await getSize()
       console.log("getSizes: ", sizeData)
       setSize(sizeData)
+      localStorage.setItem("sizes", JSON.stringify(sizeData))
     } catch (error) {
       console.log(error)
     }
@@ -95,6 +98,7 @@ function Product() {
 
   const handleFormSubmitUpdate = async () => {
     try {
+      
       await updateProduct(selectedProduct)
       fetchProduct()
       setShowUpdateForm(false)
@@ -190,13 +194,13 @@ function Product() {
                       <Table.Cell>{pro.id}</Table.Cell>
                       <Table.Cell>{pro.name}</Table.Cell>
                       <Table.Cell>{pro.description}</Table.Cell>
-                      <Table.Cell>{pro.status ? "True" : "False"}</Table.Cell>
+                      <Table.Cell>{pro.status == 1 ? "True" : "False"}</Table.Cell>
                       <Table.Cell>{pro.price}</Table.Cell>
                       <Table.Cell>{pro.category}</Table.Cell>
                       <Table.Cell>{pro.promotion}</Table.Cell>
                       <Table.Cell>
                         <Button primary onClick={() => handleUpdate(pro.id)}> Update </Button>
-                        <Button color='red' onClick={() => handleDelete(pro.id)}> Delete </Button>
+                        <Button color='red' onClick={() =>  handleDelete(pro.id)}> Delete </Button>
                       </Table.Cell>
                     </Table.Row>
                   )
@@ -246,7 +250,7 @@ function Product() {
                         { key: 1, value: true, text: 'True' },
                         { key: 0, value: false, text: 'False' },
                     ]}
-                    value={selectedProduct.status ?  true : false}
+                    value={selectedProduct.status == 1 ?  true : false}
                     onChange={(e, { value }) =>
                       setSelectedProduct({
                         ...selectedProduct,
@@ -328,7 +332,7 @@ function Product() {
       {showAddForm && (
             <div ref={addFormRef} className="add-form-container">
                 <center>
-                <h2 className="text-center">Add Category</h2>
+                <h2 className="text-center">Add Product</h2>
                 </center>
                 <Form onSubmit={handleAddFormSubmit} style={{ width: '400px' }}>
                 <Form.Field>

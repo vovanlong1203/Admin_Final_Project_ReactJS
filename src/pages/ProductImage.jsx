@@ -63,7 +63,7 @@ function ProductImage() {
             console.log('Successfully uploaded image:', response.data);
             fetchData();
             setShowAddForm(false);
-            localStorage.setItem('productImage', (iamgeProduct));
+            localStorage.setItem('productImage', JSON.stringify(iamgeProduct));
             toast.success('add item successfully!');
           } else {
             console.error('Error Found:', response.data);

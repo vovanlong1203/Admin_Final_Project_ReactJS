@@ -1,7 +1,11 @@
 import React from 'react'
 import {BsCart3, BsGrid1X2Fill, BsFillArchiveFill, BsFillGrid3X3GapFill, BsPeopleFill, BsListCheck, BsMenuButtonWideFill, BsFillGearFill}
  from 'react-icons/bs'
- import { BsFillMegaphoneFill } from "react-icons/bs";
+ import { AiOutlineGift } from "react-icons/ai"
+ import { MdOutlineConfirmationNumber } from "react-icons/md"
+ import { BiCategory } from "react-icons/bi"
+ import { LuFileInput } from "react-icons/lu"
+ import { FaImage } from "react-icons/fa"
  import { Link, NavLink } from 'react-router-dom'
 
 
@@ -28,17 +32,17 @@ function Sidebar({openSidebarToggle, OpenSideBar}) {
             </Link>
             <Link to="/promotion">
                 <li className='sidebar-list-item'>
-                        <BsFillMegaphoneFill className='icon'/> Promotion
+                        <MdOutlineConfirmationNumber className='icon'/> Promotion
                 </li>
             </Link>
             <Link to="/category">
                 <li className='sidebar-list-item'>
-                        <BsFillGrid3X3GapFill className='icon'/> Categories
+                        <BiCategory className='icon'/> Categories
                 </li>
             </Link>
             <Link to="/size">
                 <li className='sidebar-list-item'>
-                        <BsPeopleFill className='icon'/> Size
+                        <LuFileInput className='icon'/> Size
                 </li>
             </Link>
             <Link to="/quantityProduct">
@@ -48,7 +52,12 @@ function Sidebar({openSidebarToggle, OpenSideBar}) {
             </Link>
             <Link to="/productImage">
                 <li className='sidebar-list-item'>
-                        <BsMenuButtonWideFill className='icon'/> Product Image
+                        <FaImage className='icon'/> Product Image
+                </li>
+            </Link>
+            <Link to="/voucher">
+                <li className='sidebar-list-item'>
+                        <AiOutlineGift className='icon'/> Voucher
                 </li>
             </Link>
             <Link to="/login">

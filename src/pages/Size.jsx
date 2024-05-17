@@ -74,7 +74,7 @@ function Category() {
 
     const handleDelete = async (id) => {
         try {
-            await deleteCategory(id)
+            await deleteSize(id)
             fetchSize()
             localStorage.setItem('sizes', JSON.stringify(categories));
             toast.success("delete successfully!")
@@ -145,7 +145,7 @@ function Category() {
                                             <Button primary onClick={() => handleUpdate(category.id)}>
                                                 Update
                                             </Button>
-                                            <Button color="red" onClick={() => handleDelete (category.id)}>Delete</Button>
+                                            <Button color="red" onClick={() => handleDelete(category.id)}>Delete</Button>
                                         </Table.Cell>
                                 </Table.Row>
                             ))}
