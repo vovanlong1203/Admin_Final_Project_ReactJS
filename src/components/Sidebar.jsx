@@ -60,9 +60,9 @@ function Sidebar({openSidebarToggle, OpenSideBar}) {
                         <AiOutlineGift className='icon'/> Voucher
                 </li>
             </Link>
-            <Link to="/login">
+            <Link to="/order">
                 <li className='sidebar-list-item'>
-                        <BsMenuButtonWideFill className='icon'/> Reports
+                        <BsMenuButtonWideFill className='icon'/> Order
                 </li>
             </Link>
             <Link href="">

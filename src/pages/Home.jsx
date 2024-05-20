@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import 
 {BsFillBellFill, BsFillEnvelopeFill,BsFillGrid3X3GapFill, BsPersonCircle, BsSearch, BsJustify, BsFillArchiveFill, BsPeopleFill}
 from 'react-icons/bs'
+import { FaReceipt } from "react-icons/fa";
 import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-
+import { get_all_user, getCategory, getProducts, getOrder } from '../api/service';
 
 function Home() {
     const data = [
@@ -51,6 +52,39 @@ function Home() {
         },
       ];
 
+    const [users, setUsers] = useState([])
+    const [products, setProducts] = useState([])
+    const [categories, setCategories] = useState([])
+    const [orders, setOrders] = useState([])
+
+    const fetchData = async () => {
+        const responseDataProducts = await getProducts()
+        const responseDataCategories = await getCategory()
+
+        setProducts(responseDataProducts)
+        setCategories(responseDataCategories)
+
+    }
+    const fetchDataUser = async () => {
+        const responseDataUser = await get_all_user()
+        console.log("user: ", responseDataUser)
+        setUsers(responseDataUser)
+    }
+    const fetchDataOrder = async () => {
+        const responseDataOrder = await getOrder()
+        console.log(responseDataOrder)
+        setOrders(responseDataOrder)
+
+    }
+    useEffect(() => {
+        fetchData()
+        fetchDataUser()
+        fetchDataOrder()
+
+    }, [])
+    
+
+    
     return (
         <div className='main-container'>
             <div className='main-title'>
@@ -63,7 +97,7 @@ function Home() {
                         <h3>PRODUCTS</h3>
                         <BsFillArchiveFill className='card_icon'/>
                     </div>
-                    <h1>300</h1>
+                    <h1>{products.length}</h1>
                 </div>
 
                 <div className='card'>
@@ -71,7 +105,7 @@ function Home() {
                         <h3>CATEGORIES</h3>
                         <BsFillGrid3X3GapFill className='card_icon'/>
                     </div>
-                    <h1>12</h1>
+                    <h1>{categories.length}</h1>
                 </div>
 
                 <div className='card'>
@@ -79,15 +113,15 @@ function Home() {
                         <h3>CUSTOMERS</h3>
                         <BsPeopleFill className='card_icon'/>
                     </div>
-                    <h1>33</h1>
+                    <h1>{users.length}</h1>
                 </div>
 
                 <div className='card'>
                     <div className='card-inner'>
-                        <h3>ALERTS</h3>
-                        <BsFillBellFill className='card_icon'/>
+                        <h3>Order</h3>
+                        <FaReceipt className='card_icon'/>
                     </div>
-                    <h1>42</h1>
+                    <h1>{orders.length}</h1>
                 </div>
             </div>
 

@@ -18,6 +18,7 @@ import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
 import ProductImage from './pages/ProductImage'
 import Voucher from './pages/Voucher'
+import Order from './pages/Order'
 
 function App() {
 
@@ -99,6 +100,7 @@ function App() {
                 <Route path="/quantityProduct" element={<ProductSize />} />
                 <Route path="/productImage" element={<ProductImage />} />
                 <Route path="/voucher" element={<Voucher />} />
+                <Route path="/order" element={<Order />} />
               </Routes>
             </div>
           </>

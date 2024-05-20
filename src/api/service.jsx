@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const URL = "http://192.168.1.10:5000"
-export const url_web = "http://192.168.1.10:5000"
+const URL = "http://192.168.1.23:5000"
+export const url_web = "http://192.168.1.23:5000"
 
 // const token = localStorage.getItem('accessToken')
 /* api login */
@@ -18,6 +18,26 @@ export const url_web = "http://192.168.1.10:5000"
  }
 
 /*end api login */
+
+/* api user */
+
+export const get_all_user = async () => {
+  try {
+    const token = localStorage.getItem('accessToken');
+    const response = await axios.get(`${URL}/api/admin/user`, {
+      headers: {
+        'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
+    }
+    }); 
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    console.log("error: ", error)
+    throw error;
+  }
+};
+
+/*end api user */
 
 
 /* api promotion */
@@ -400,3 +420,38 @@ export const deleteVoucher = async (id) => {
 
 /* End api voucher */
 
+/*  api order */
+export const getOrder = async () => {
+  try {
+    const token = localStorage.getItem('accessToken');
+    const response = await axios.get(`${URL}/api/admin/orders`, {
+      headers: {
+        'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
+    }
+    })
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
+export const updateStatusOrder = async (id, data) => {
+  console.info("data send server: ", data)
+
+  try {
+      const token = localStorage.getItem('accessToken');
+      const response = await axios.put(`${URL}/api/admin/orders/${id}`, data, {
+        headers: {
+          'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
+      }
+      })
+      console.info("result data: ", response)    
+      return response
+  } catch (error) {
+      console.log("error: ", error)
+      throw error;
+  }
+}
+
+/* End api order */
