@@ -9,16 +9,61 @@ import '../assets/promotion.css';
 function Promotion() {
     const [promotion, setPromotion] = useState([])
     const [showUpdateForm, setShowUpdateForm] = useState(false)
+    const [searchKeyword, setSearchKeyword] = useState("")
+    const [filteredPromotion, setFilteredPromotion] = useState([])
     const [showAddForm, setShowAddForm] = useState(false)
     const [selectedPromotion, setSelectedPromotion] = useState(null)
     const updateFormRef = useRef(null)
     const addFormRef = useRef(null)
+    const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+    const [itemsPerPage, setItemsPerPage] = useState(10); // Số mục trên mỗi trang
 
+    const indexOfLastItem = currentPage * itemsPerPage
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage
+
+    const currentPromotion = filteredPromotion.slice(indexOfFirstItem, indexOfLastItem)
+    const totalPages = Math.ceil(filteredPromotion.length / itemsPerPage)
+
+    const goToPreviousPage = () => {
+        setCurrentPage(prevPage => Math.max(prevPage - 1, 1));
+    };
+
+    const goToNextPage = () => {
+        setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages));
+    };
+
+    const goToPage = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const renderPaginationButtons = () => {
+        const pageNumbers = [];
+        for (let i = 1; i <= totalPages; i++) {
+            pageNumbers.push(i);
+        }
+        return (
+            <div>
+                <Button color='grey' onClick={goToPreviousPage} disabled={currentPage === 1}>Previous</Button>
+                {pageNumbers.map(number => (
+                    <Button
+                        key={number}
+                        onClick={() => goToPage(number)}
+                        disabled={currentPage === number}
+                    >
+                        {number}
+                    </Button>
+                ))}
+                <Button color='purple' onClick={goToNextPage} disabled={currentPage === totalPages}>Next</Button>
+
+            </div>
+        );
+    };
 
     const fetchPromotion = async () => {
         try {
             const PromotionData = await getPromotions()
             setPromotion(PromotionData)
+            setFilteredPromotion(PromotionData)
         } catch (error) {
             console.log(error)
         }
@@ -105,6 +150,16 @@ function Promotion() {
             toast.success(error)
         }
     }
+
+    const handleSearch = () => {
+        const keyword = searchKeyword.toLowerCase()
+        const filtered = promotion.filter((pro) =>
+            pro.name.toLowerCase().includes(keyword) ||
+            pro.description.toLowerCase().includes(keyword)
+        );
+        setFilteredPromotion(filtered);
+    };
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (addFormRef.current && !addFormRef.current.contains(event.target)) {
@@ -136,10 +191,26 @@ function Promotion() {
         <div className='main-container'>
             <div className={`main-container ${showUpdateForm || showAddForm ? 'blur-background' : ''}`}>
                 <center>
-                    <h2 className="text-center">Promotion List</h2>
+                    <h2 className="text-center">Promotion Management</h2>
                 </center>
-                <div className="row">
-                    <Button primary onClick={() => setShowAddForm(true)}>Add Promotion</Button>
+                <br />
+                <div style={{ display: 'flex' ,justifyContent : 'space-between'}}>
+                    <div className="row" style={{marginBottom: '20px'}}>
+                        <Input
+                            type="text"
+                            placeholder="Search..."
+                            value={searchKeyword}
+                            onChange={(e) => setSearchKeyword(e.target.value)}
+                            style={{ paddingRight: '20px' }}
+                        />
+                        <Button primary type='button' 
+                        onClick={handleSearch}
+                        >Search</Button>
+                    </div>
+
+                    <div className="row">
+                        <Button primary onClick={() => setShowAddForm(true)}>Add Promotion</Button>
+                    </div>
                 </div>
                 <br />
                 <div>
@@ -158,12 +229,12 @@ function Promotion() {
                         </Table.Header>
 
                         <Table.Body>
-                            {promotion.map((pro) => {
+                            {currentPromotion.map((pro) => {
                                 return (
                                     <Table.Row key={pro.id}>
                                         <Table.Cell>{pro.id}</Table.Cell>
-                                        <Table.Cell>{pro.name}</Table.Cell>
-                                        <Table.Cell>{pro.description}</Table.Cell>
+                                        <Table.Cell className="break-word">{pro.name}</Table.Cell>
+                                        <Table.Cell className="break-word">{pro.description}</Table.Cell>
                                         <Table.Cell>{pro.is_active ? "True" : "False"}</Table.Cell>
                                         <Table.Cell>{pro.discount_value}</Table.Cell>
                                         <Table.Cell>{new Date(pro.start_at).toISOString().slice(0, 16)}</Table.Cell>
@@ -180,6 +251,8 @@ function Promotion() {
                         </Table.Body>
                     </Table>
                 </div>
+                <br />
+                {renderPaginationButtons()}
             </div>
 
             {showUpdateForm && selectedPromotion && (

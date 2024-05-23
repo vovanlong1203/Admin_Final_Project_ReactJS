@@ -65,11 +65,11 @@ function Sidebar({openSidebarToggle, OpenSideBar}) {
                         <BsMenuButtonWideFill className='icon'/> Order
                 </li>
             </Link>
-            <Link href="">
+            {/* <Link href="">
                 <li className='sidebar-list-item'>
                         <BsFillGearFill className='icon'/> Setting
                 </li>
-            </Link>
+            </Link> */}
         </ul>
 
     </aside>

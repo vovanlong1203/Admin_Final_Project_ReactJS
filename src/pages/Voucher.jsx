@@ -10,6 +10,8 @@ function Voucher() {
     const [voucher, setVoucher] = useState([])
     const [showUpdateForm, setShowUpdateForm] = useState(false)
     const [showAddForm, setShowAddForm] = useState(false)
+    const [searchKeyword, setSearchKeyword] = useState("")
+    const [filterVoucher, setFilterVoucher] = useState([])
     const updateFormRef = useRef(null)
     const addFormRef = useRef(null)
     const [newVoucher, setNewVoucher] = useState({
@@ -26,10 +28,55 @@ function Voucher() {
         maxDiscountValue: 0
       });
 
+    const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+    const [itemsPerPage, setItemsPerPage] = useState(10); // Số mục trên mỗi trang
+
+    const indexOfLastItem = currentPage * itemsPerPage
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage
+
+    const currentVoucher = filterVoucher.slice(indexOfFirstItem, indexOfLastItem)
+    const totalPages = Math.ceil(filterVoucher.length / itemsPerPage)
+
+    const goToPreviousPage = () => {
+        setCurrentPage(prevPage => Math.max(prevPage - 1, 1));
+    };
+
+    const goToNextPage = () => {
+        setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages));
+    };
+
+    const goToPage = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const renderPaginationButtons = () => {
+        const pageNumbers = [];
+        for (let i = 1; i <= totalPages; i++) {
+            pageNumbers.push(i);
+        }
+        return (
+            <div>
+                <Button color='grey' onClick={goToPreviousPage} disabled={currentPage === 1}>Previous</Button>
+                {pageNumbers.map(number => (
+                    <Button
+                        key={number}
+                        onClick={() => goToPage(number)}
+                        disabled={currentPage === number}
+                    >
+                        {number}
+                    </Button>
+                ))}
+                <Button color='purple' onClick={goToNextPage} disabled={currentPage === totalPages}>Next</Button>
+
+            </div>
+        );
+    };
+
     const fecthVoucher = async () => {
         try {
             const voucherData = await getVoucher()
             setVoucher(voucherData)
+            setFilterVoucher(voucherData)
         }catch (error) {
             console.log("error: ",error)
         }
@@ -70,22 +117,48 @@ function Voucher() {
         }
     }
 
+    const handleSearch = () => {
+        const keyword = searchKeyword.toLowerCase()
+
+        const filtered = voucher.filter((pro) => 
+            pro.code.toLowerCase().includes(keyword) ||
+            pro.voucher_type.toLowerCase().includes(keyword) || 
+            pro.discount_type.toLowerCase().includes(keyword) ||
+            (pro.maxDiscountValue == keyword)
+        )
+
+        setFilterVoucher(filtered)
+    }
+
   return (
     <div className='main-container'>
         <div className={`main-container ${showUpdateForm || showAddForm ? 'blur-background' : ''}`}>
             <center>
-                <h2 className="text-center">Promotion List</h2>
-            </center>    
-            <div className="row">
-                <Button primary onClick={() => setShowAddForm(true)}>Add Promotion</Button>
+                <h2 className="text-center">Promotion Management</h2>
+            </center>  
+            <div style={{ display: 'flex' ,justifyContent : 'space-between'}}>
+                <div className="row" style={{marginBottom: '20px'}}>
+                    <Input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchKeyword}
+                        onChange={(e) => setSearchKeyword(e.target.value)}
+                        style={{ paddingRight: '20px' }}
+                    />
+                    <Button primary type='button' 
+                    onClick={handleSearch}
+                    >Search</Button>
+                </div>
+                <div className="row">
+                    <Button primary onClick={() => setShowAddForm(true)}>Add Voucher</Button>
+                </div>
             </div>
-            <br />
             <div>
             <Table singleLine>
                 <Table.Header>
                     <Table.Row>
                         <Table.HeaderCell>Id</Table.HeaderCell>
-                        <Table.HeaderCell>minimum purchase amount</Table.HeaderCell>
+                        <Table.HeaderCell >minimum purchase amount</Table.HeaderCell>
                         <Table.HeaderCell>usage count</Table.HeaderCell>
                         <Table.HeaderCell>usage limit</Table.HeaderCell>
                         <Table.HeaderCell>voucher value</Table.HeaderCell>
@@ -102,7 +175,7 @@ function Voucher() {
 
                 <Table.Body>
                     {
-                        voucher.map((pro) => {
+                        currentVoucher.map((pro) => {
                             return (
                                 <Table.Row key={pro.id}>
                                     <Table.Cell>{pro.id}</Table.Cell>
@@ -129,6 +202,8 @@ function Voucher() {
                 </Table.Body>
             </Table>
             </div>
+            <br />
+            {renderPaginationButtons()}
 
         </div>
 

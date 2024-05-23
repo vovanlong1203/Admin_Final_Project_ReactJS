@@ -35,3 +35,8 @@
   .normal {
       color: black;
   }
+  .break-word {
+    word-break: break-word;
+    white-space: normal;
+    max-width: 200px; /* Bạn có thể điều chỉnh chiều rộng này để phù hợp với yêu cầu của bạn */
+  }

@@ -9,6 +9,8 @@ function ProductSize() {
   const [productSize, setProductSize] = useState([])
   const [product, setProduct] = useState([])
   const [size, setSize] = useState([])
+  const [searchKeyword, setSearchKeyword] = useState("")
+  const [filteredProductSize, setFilteredProductSize] = useState([])
   const [showAddForm, setShowAddForm] = useState(false)
   const [showUpdateForm, setShowUpdateForm] = useState(false)
   const [newProductSize, setNewProductSize] = useState({
@@ -19,10 +21,55 @@ function ProductSize() {
   const updateFormRef = useRef(null)
   const addFormRef = useRef(null)
 
+  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+  const [itemsPerPage, setItemsPerPage] = useState(10); // Số mục trên mỗi trang
+
+  const indexOfLastItem = currentPage * itemsPerPage
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage
+
+  const currentProductSize = filteredProductSize.slice(indexOfFirstItem, indexOfLastItem)
+  const totalPages = Math.ceil(filteredProductSize.length / itemsPerPage)
+
+  const goToPreviousPage = () => {
+    setCurrentPage(prevPage => Math.max(prevPage - 1, 1));
+    };
+
+    const goToNextPage = () => {
+        setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages));
+    };
+
+    const goToPage = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const renderPaginationButtons = () => {
+        const pageNumbers = [];
+        for (let i = 1; i <= totalPages; i++) {
+            pageNumbers.push(i);
+        }
+        return (
+            <div>
+                <Button color='grey' onClick={goToPreviousPage} disabled={currentPage === 1}>Previous</Button>
+                {pageNumbers.map(number => (
+                    <Button
+                        key={number}
+                        onClick={() => goToPage(number)}
+                        disabled={currentPage === number}
+                    >
+                        {number}
+                    </Button>
+                ))}
+                <Button color='purple' onClick={goToNextPage} disabled={currentPage === totalPages}>Next</Button>
+
+            </div>
+        );
+    };
+
   const fetchProductSize = async () => {
     try {
         const productSizeData = await getProductSize()
         setProductSize(productSizeData)
+        setFilteredProductSize(productSizeData)
       } catch (error) {
         console.log(error)
       }
@@ -31,7 +78,6 @@ function ProductSize() {
   const fetchProduct = async () => {
     try {
       const productData = await getProducts()
-      console.log("product: ", productData)
       setProduct(productData)
     } catch (error) {
       console.log(error)
@@ -45,10 +91,6 @@ function ProductSize() {
     } catch (error) {
       console.log(error)
     }
-  }
-
-  const printNewProductSize = () => {
-    console.log("data new ", newProductSize)
   }
 
   const handleFormAdd = async () => {
@@ -69,6 +111,15 @@ function ProductSize() {
     getSizes()
   }, [])
 
+  const handleSearch = () => {
+    const keyword = searchKeyword.toLowerCase()
+
+    const filtered = productSize.filter((pro) =>
+        pro.product.toLowerCase().includes(keyword)    
+    )
+
+    setFilteredProductSize(filtered)
+  }
   
 
   return (
@@ -77,8 +128,22 @@ function ProductSize() {
             <center>
                 <h2>Product Size List</h2>  
             </center>
-            <div className="row">
-                <Button primary onClick={() => setShowAddForm(true)}>Add Product</Button>
+            <div style={{ display: 'flex' ,justifyContent : 'space-between'}}>
+                <div className="row" style={{marginBottom: '20px'}}>
+                    <Input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchKeyword}
+                        onChange={(e) => setSearchKeyword(e.target.value)}
+                        style={{ paddingRight: '20px' }}
+                    />
+                    <Button primary type='button' 
+                    onClick={handleSearch}
+                    >Search</Button>
+                </div>
+                <div className="row">
+                    <Button primary onClick={() => setShowAddForm(true)}>Add Product</Button>
+                </div>
             </div>
             <br />
             <div>
@@ -95,11 +160,11 @@ function ProductSize() {
 
                     <Table.Body>
                         {
-                            productSize.map((item) => {
+                            currentProductSize.map((item) => {
                                 return (
                                     <Table.Row key={item.id}>
                                         <Table.Cell>{item.id}</Table.Cell>
-                                        <Table.Cell>{item.product}</Table.Cell>
+                                        <Table.Cell className="break-word">{item.product}</Table.Cell>
                                         <Table.Cell>{item.quantity}</Table.Cell>
                                         <Table.Cell>{item.quantity_sold}</Table.Cell>
                                         <Table.Cell>{item.size}</Table.Cell>
@@ -110,7 +175,8 @@ function ProductSize() {
                     </Table.Body>
                 </Table>
             </div>
-
+            <br />
+            {renderPaginationButtons()}
         </div>
 
         {showAddForm && (
@@ -170,7 +236,7 @@ function ProductSize() {
                     />
                 </Form.Field>                
                 <Form.Field style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Button primary type="submit" onClick={printNewProductSize}>
+                    <Button primary type="button" onClick={handleFormAdd}>
                         Add
                     </Button>
                     <Button color='red'onClick={() => setShowAddForm(false)}>

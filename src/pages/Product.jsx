@@ -11,6 +11,8 @@ function Product() {
   const [size, setSize] = useState([])
   const [categories, setCategories] = useState([]);
   const [promotionValid, setPromotionValid] = useState(false)
+  const [searchKeyword, setSearchKeyword] = useState("")
+  const [filteredProduct, setFilteredProduct] = useState([])
   const [showAddForm, setShowAddForm] = useState(false)
   const [showUpdateForm, setShowUpdateForm] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState(null)
@@ -22,14 +24,24 @@ function Product() {
       category: "",
       promotion: ""
   });
-  const updateFormRef = useRef(null);
-  const addFormRef = useRef(null);
+  const updateFormRef = useRef(null)
+  const addFormRef = useRef(null)
+  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+  const [itemsPerPage, setItemsPerPage] = useState(10); // Số mục trên mỗi trang
+
+  const indexOfLastItem = currentPage * itemsPerPage
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage
+
+  const currentPromotion = filteredProduct.slice(indexOfFirstItem, indexOfLastItem)
+  const totalPages = Math.ceil(filteredProduct.length / itemsPerPage)
+
   
   const fetchProduct = async () => {
     try {
       const productData = await getProducts()
-      console.log("product: ", productData)
       setProduct(productData)
+      setFilteredProduct(productData)
+
       localStorage.setItem("products", JSON.stringify(productData))
     } catch (error) {
       console.log(error)
@@ -129,6 +141,52 @@ function Product() {
     fetchPromotionValid()
   },[])
 
+  const handleSearch = () => {
+    const keyword = searchKeyword.toLowerCase()
+
+    const filtered = product.filter((pro) => 
+      pro.name.toLowerCase().includes(keyword) ||
+      pro.description.toLowerCase().includes(keyword) 
+    )
+
+    setFilteredProduct(filtered)
+  }
+
+  const goToPreviousPage = () => {
+    setCurrentPage(prevPage => Math.max(prevPage - 1, 1));
+  };
+
+  const goToNextPage = () => {
+    setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages));
+  };
+
+  const goToPage = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const renderPaginationButtons = () => {
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+    }
+    return (
+        <div>
+            <Button color='grey' onClick={goToPreviousPage} disabled={currentPage === 1}>Previous</Button>
+            {pageNumbers.map(number => (
+                <Button
+                    key={number}
+                    onClick={() => goToPage(number)}
+                    disabled={currentPage === number}
+                >
+                    {number}
+                </Button>
+            ))}
+            <Button color='purple' onClick={goToNextPage} disabled={currentPage === totalPages}>Next</Button>
+
+        </div>
+    );
+};
+
   useEffect(() => {
     console.log("selectedProduct: ", selectedProduct);
 }, [selectedProduct]);
@@ -164,11 +222,26 @@ function Product() {
     <div className='main-container'>
       <div className={`main-container ${showUpdateForm || showAddForm ? 'blur-background' : ''}`}>
         <center>
-          <h2>Product list</h2>  
-        </center>        
+          <h2>Product Management</h2>  
+        </center>
+        <div style={{ display: 'flex' ,justifyContent : 'space-between'}}>
+          <div style={{marginBottom: '20px'}}>
+            <Input
+                type="text"
+                placeholder="Search..."
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                style={{ paddingRight: '20px' }}
+            />
+            <Button primary type='button' 
+            onClick={handleSearch}
+            >Search</Button>
+        </div>        
 
-        <div className="row">
-          <Button primary onClick={() => setShowAddForm(true)}>Add Product</Button>
+          <div >
+            <Button primary onClick={() => setShowAddForm(true)}>Add Product</Button>
+          </div>
+          
         </div>
         <br />
         <div>
@@ -188,12 +261,12 @@ function Product() {
 
             <Table.Body>
               {
-                product.map((pro) => {
+                currentPromotion.map((pro) => {
                   return (
                     <Table.Row key={pro.id}>
                       <Table.Cell>{pro.id}</Table.Cell>
-                      <Table.Cell>{pro.name}</Table.Cell>
-                      <Table.Cell>{pro.description}</Table.Cell>
+                      <Table.Cell className="break-word">{pro.name}</Table.Cell>
+                      <Table.Cell className="break-word">{pro.description}</Table.Cell>
                       <Table.Cell>{pro.status == 1 ? "True" : "False"}</Table.Cell>
                       <Table.Cell>{pro.price}</Table.Cell>
                       <Table.Cell>{pro.category}</Table.Cell>
@@ -209,6 +282,8 @@ function Product() {
             </Table.Body>
           </Table>          
         </div>
+        <br />
+        {renderPaginationButtons()}
       </div>
 
       {showUpdateForm && selectedProduct && (

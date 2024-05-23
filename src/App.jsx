@@ -19,6 +19,7 @@ import { ToastContainer } from "react-toastify";
 import ProductImage from './pages/ProductImage'
 import Voucher from './pages/Voucher'
 import Order from './pages/Order'
+import 'chart.js/auto'
 
 function App() {
 

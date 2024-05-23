@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Table, Button, Form, Input, Tab } from 'semantic-ui-react';
 import "../assets/category.css"
-import { getProducts, getProductImage } from '../api/service';
+import { getProducts, getProductImage, deleteProductImage } from '../api/service';
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
 import { url_web } from '../api/service'
@@ -14,6 +14,8 @@ function ProductImage() {
     const [product, setProduct] = useState([])
     const [showAddForm, setShowAddForm] = useState(false)
     const [showUpdateForm, setShowUpdateForm] = useState(false)
+    const [searchKeyword, setSearchKeyword] = useState("")
+    const [filteredProductImage, setFilteredProductImage] = useState([])
     const updateFormRef = useRef(null);
     const addFormRef = useRef(null);
     const [productId, setProductId] = useState('');
@@ -21,10 +23,55 @@ function ProductImage() {
 
     const formData = new FormData();
 
+    const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+    const [itemsPerPage, setItemsPerPage] = useState(10); // Số mục trên mỗi trang
+
+    const indexOfLastItem = currentPage * itemsPerPage
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage
+
+    const currentProductImage = filteredProductImage.slice(indexOfFirstItem, indexOfLastItem)
+    const totalPages = Math.ceil(filteredProductImage.length / itemsPerPage)
+
+    const goToPreviousPage = () => {
+        setCurrentPage(prevPage => Math.max(prevPage - 1, 1));
+    };
+
+    const goToNextPage = () => {
+        setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages));
+    };
+
+    const goToPage = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const renderPaginationButtons = () => {
+        const pageNumbers = [];
+        for (let i = 1; i <= totalPages; i++) {
+            pageNumbers.push(i);
+        }
+        return (
+            <div>
+                <Button color='grey' onClick={goToPreviousPage} disabled={currentPage === 1}>Previous</Button>
+                {pageNumbers.map(number => (
+                    <Button
+                        key={number}
+                        onClick={() => goToPage(number)}
+                        disabled={currentPage === number}
+                    >
+                        {number}
+                    </Button>
+                ))}
+                <Button color='purple' onClick={goToNextPage} disabled={currentPage === totalPages}>Next</Button>
+
+            </div>
+        );
+    };
+
     const fetchData = async () => {
         try {
             const response = await getProductImage()
             setImageProduct(response)
+            setFilteredProductImage(response)
             
         } catch (error) {
             console.log(error)
@@ -53,7 +100,7 @@ function ProductImage() {
         const token = localStorage.getItem('accessToken');
       
         try {
-          const response = await axios.post(`${url_web}/api/product_image/admin`, formData, {
+          const response = await axios.post(`${url_web}/api/admin/product_image`, formData, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'multipart/form-data',
@@ -75,6 +122,18 @@ function ProductImage() {
         }
       };
 
+    const handleDelete = async (id) => {
+        try {
+            await deleteProductImage(id)
+            fetchData()
+            localStorage.setItem('productImage', JSON.stringify(promotion));
+            toast.success("delete successfully!")
+        } catch (error) {
+            console.log("error: ", error)
+            toast.success(error)
+        }
+    }
+
     const handleProductChange = (event) => {
         setProductId(event.target.value);
       };
@@ -82,6 +141,16 @@ function ProductImage() {
     const handleImageChange = (event) => {
         setImages(event.target.files[0]);
       };
+
+    const handleSearch = () => {
+        const keyword = searchKeyword.toLowerCase()
+
+        const filtered = iamgeProduct.filter((pro) => 
+            pro.product.toLowerCase().includes(keyword)
+        )
+
+        setFilteredProductImage(filtered)
+    }
 
     useEffect (() => {
         fetchData()
@@ -91,10 +160,24 @@ function ProductImage() {
         <div className='main-container'>
             <div className={`main-container ${showUpdateForm || showAddForm ? 'blur-background' : ''}`}>
                 <center>
-                    <h2>Product list</h2>  
+                    <h2>Product Management</h2>  
                 </center>  
-                <div className="row">
-                    <Button primary onClick={() => setShowAddForm(true)}>Add Product</Button>
+                <div style={{ display: 'flex' ,justifyContent : 'space-between'}}>
+                    <div className="row" style={{marginBottom: '20px'}}>
+                        <Input
+                            type="text"
+                            placeholder="Search..."
+                            value={searchKeyword}
+                            onChange={(e) => setSearchKeyword(e.target.value)}
+                            style={{ paddingRight: '20px' }}
+                        />
+                        <Button primary type='button' 
+                        onClick={handleSearch}
+                        >Search</Button>
+                    </div>
+                    <div className="row">
+                        <Button primary onClick={() => setShowAddForm(true)}>Add Product</Button>
+                    </div>
                 </div>
                 <br />
                 <div>
@@ -110,15 +193,14 @@ function ProductImage() {
 
                     <Table.Body>
                     {
-                        iamgeProduct.map((item) => {
+                        currentProductImage.map((item) => {
                             return (
                                 <Table.Row key={item.id}>
                                     <Table.Cell>{item.id}</Table.Cell>
-                                    <Table.Cell>{item.product}</Table.Cell>
-                                    <Table.Cell>{item.url}</Table.Cell>
+                                    <Table.Cell className="break-word">{item.product}</Table.Cell>
+                                    <Table.Cell className="break-word">{item.url}</Table.Cell>
                                     <Table.Cell>
-                                        <Button primary > Update </Button>
-                                        <Button color='red'> Delete </Button>
+                                        <Button color='red' onClick={() => handleDelete(item.id)}> Delete </Button>
                                     </Table.Cell>
                                 </Table.Row>
                             )
@@ -127,6 +209,8 @@ function ProductImage() {
                     </Table.Body>
                 </Table>
                 </div>
+                <br />
+                {renderPaginationButtons()}
             </div>
 
             {showAddForm && (

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const URL = "http://192.168.1.23:5000"
-export const url_web = "http://192.168.1.23:5000"
+const URL = "http://192.168.1.17:5000"
+export const url_web = "http://192.168.1.17:5000"
 
 // const token = localStorage.getItem('accessToken')
 /* api login */
@@ -126,7 +126,7 @@ export const deletePromtion = async (id) => {
 export const getCategory = async () => {
   try {
     const token = localStorage.getItem('accessToken');
-    const response = await axios.get(`${URL}/api/category`, {
+    const response = await axios.get(`${URL}/api/admin/category`, {
       headers: {
         'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
     }
@@ -141,7 +141,7 @@ export const getCategory = async () => {
 export const addCategory = async (data) => {
   try {
     const token = localStorage.getItem('accessToken');
-    const response = await axios.post(`${URL}/api/category`, data, {
+    const response = await axios.post(`${URL}/api/admin/category`, data, {
       headers: {
         'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
     }
@@ -156,7 +156,7 @@ export const updateCateogry = async (categoryId, data) => {
     console.info("data send server: ", data)
     try {
         const token = localStorage.getItem('accessToken');
-        const response = await axios.put(`${URL}/api/category/${categoryId}`, data, {
+        const response = await axios.put(`${URL}/api/admin/category/${categoryId}`, data, {
           headers: {
             'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
         }
@@ -172,7 +172,7 @@ export const updateCateogry = async (categoryId, data) => {
 export const deleteCategory = async (id) => {
   try {
     const token = localStorage.getItem('accessToken');
-    const response = await axios.delete(`${URL}/api/category/${id}`, {
+    const response = await axios.delete(`${URL}/api/admin/category/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
     }
@@ -369,6 +369,20 @@ export const getProductImage = async () => {
 //   }
 // }
 
+export const deleteProductImage = async (id) => {
+  try {
+    const token = localStorage.getItem('accessToken');
+    const response = await axios.delete(`${URL}/api/admin/product_image/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
+    }
+    })
+    return response
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 /* End api product image */
 
 
@@ -451,6 +465,51 @@ export const updateStatusOrder = async (id, data) => {
   } catch (error) {
       console.log("error: ", error)
       throw error;
+  }
+}
+
+export const revenueStatisticYear = async (year) => {
+  try {
+    const token = localStorage.getItem('accessToken')
+    const response = await axios.get(`${URL}/api/admin/orders/revenue?year=${year}`, {
+      headers: {
+        'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
+    }
+    })
+    return response.data
+  } catch (error) {
+    console.log("error: ", error)
+    throw error;
+  }
+}
+
+export const getStatusOrder = async (year) => {
+  try {
+    const token = localStorage.getItem('accessToken')
+    const response = await axios.get(`${URL}/api/admin/orders/status?year=${year}`, {
+      headers: {
+        'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
+    }
+    })
+    return response.data
+  } catch (error) {
+    console.log("error: ", error)
+    throw error;
+  }
+}
+
+export const getYearOrder = async () => {
+  try {
+    const token = localStorage.getItem('accessToken')
+    const response = await axios.get(`${URL}/api/admin/orders/year`, {
+      headers: {
+        'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
+    }
+    })
+    return response.data
+  } catch (error) {
+    console.log("error: ", error)
+    throw error;
   }
 }
 
