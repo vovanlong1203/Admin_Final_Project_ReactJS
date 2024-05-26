@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const URL = "http://192.168.1.17:5000"
-export const url_web = "http://192.168.1.17:5000"
+const URL = "https://deploy-api-s8u1.onrender.com"
+export const url_web = "https://deploy-api-s8u1.onrender.com"
 
 // const token = localStorage.getItem('accessToken')
 /* api login */
