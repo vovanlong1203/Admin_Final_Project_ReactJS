@@ -6,14 +6,15 @@ import { FaReceipt } from "react-icons/fa";
 import { 
     BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
 } from 'recharts';
-import { get_all_user, getCategory, getProducts, getOrder, revenueStatisticYear, getYearOrder, getStatusOrder } from '../api/service';
+import { get_all_user, getCategory, getProduct, getOrder, revenueStatisticYear, getYearOrder, getStatusOrder, getCountProduct, getCountCategory, getCountUser, getCountOrder, getOrderByMonthYear, getOrderStatusByMonthYear} from '../api/service';
 import OrderStatusChart from './PieChart';
+import ProductSize from './ProductSize';
 
 function Home() {
-    const [users, setUsers] = useState([]);
-    const [products, setProducts] = useState([])
-    const [categories, setCategories] = useState([])
-    const [orders, setOrders] = useState([])
+    const [users, setUsers] = useState(0);
+    const [products, setProducts] = useState(0)
+    const [categories, setCategories] = useState(0)
+    const [orders, setOrders] = useState(0)
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
     const [data, setData] = useState([])
     const [revenueData, setRevenueData] = useState([])
@@ -21,8 +22,8 @@ function Home() {
     const [orderStatusData, setOrderStatusData] = useState({})
 
     const fetchData = async () => {
-        const responseDataProducts = await getProducts()
-        const responseDataCategories = await getCategory()
+        const responseDataProducts = await getCountProduct()
+        const responseDataCategories = await getCountCategory()
         const responseGetYearOrder = await getYearOrder()
         setProducts(responseDataProducts)
         setCategories(responseDataCategories)
@@ -30,12 +31,12 @@ function Home() {
     }
 
     const fetchDataUser = async () => {
-        const responseDataUser = await get_all_user()
+        const responseDataUser = await getCountUser()
         setUsers(responseDataUser)
     }
 
     const fetchDataOrder = async () => {
-        const responseDataOrder = await getOrder()
+        const responseDataOrder = await getCountOrder()
         setOrders(responseDataOrder)
     }
 
@@ -64,20 +65,14 @@ function Home() {
     const colors = ['#8884d8', '#83a6ed', '#8dd1e1', '#82ca9d', '#a4de6c', '#d0ed57', '#ffc658', '#ff8042', '#ffbb28', '#ff7300', '#ff0000', '#00ff00'];
 
     const handleYearChange = (event) => {
-        const year = event.target.value; // Lấy giá trị năm mới từ dropdown
-        setSelectedYear(year); // Cập nhật state selectedYear với năm mới được chọn
+        const year = event.target.value; 
+        setSelectedYear(year); 
       };
 
     useEffect(() => {
         setData(revenueData);
     }, [revenueData]);
 
-    // const orderStatusData = {
-    //     'Pending': 20,
-    //     'Processing': 50,
-    //     'Shipped': 30,
-    //     'Delivered': 100
-    // };
 
     return (
         <div className='main-container'>
@@ -88,40 +83,40 @@ function Home() {
             <div className='main-cards'>
                 <div className='card'>
                     <div className='card-inner'>
-                        <h3>PRODUCTS</h3>
+                        <h3>SẢN PHẨM</h3>
                         <BsFillArchiveFill className='card_icon'/>
                     </div>
-                    <h1>{products.length}</h1>
+                    <h1>{products}</h1>
                 </div>
 
                 <div className='card'>
                     <div className='card-inner'>
-                        <h3>CATEGORIES</h3>
+                        <h3>DANH MỤC</h3>
                         <BsFillGrid3X3GapFill className='card_icon'/>
                     </div>
-                    <h1>{categories.length}</h1>
+                    <h1>{categories}</h1>
                 </div>
 
                 <div className='card'>
                     <div className='card-inner'>
-                        <h3>CUSTOMERS</h3>
+                        <h3>KHÁCH HÀNG</h3>
                         <BsPeopleFill className='card_icon'/>
                     </div>
-                    <h1>{users.length}</h1>
+                    <h1>{users}</h1>
                 </div>
 
                 <div className='card'>
                     <div className='card-inner'>
-                        <h3>ORDERS</h3>
+                        <h3>ĐƠN HÀNG</h3>
                         <FaReceipt className='card_icon'/>
                     </div>
-                    <h1>{orders.length}</h1>
+                    <h1>{orders}</h1>
                 </div>
             </div>
 
             <div className='charts'>
                 <div className='year-select'>
-                    <label className='year-select-label'>Select Year: </label>
+                    <label className='year-select-label'>Chọn năm: </label>
                     <select className='year-select-dropdown' value={selectedYear} onChange={handleYearChange}>
                         {years.map((year) => (
                             <option key={year} value={year}>
@@ -143,17 +138,16 @@ function Home() {
                         }}
                     >
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="month" />
-                        <YAxis />
+                        <XAxis dataKey="month" label={{ value: 'Month', position: 'insideBottom', offset: -10 }} />
+                        <YAxis label={{ value: 'Revenue', angle: -90, position: 'insideLeft' }} />
                         <Tooltip />
                         <Legend />
-                        
                         <Bar dataKey="revenue" fill="#8884d8" />
                     </BarChart>
                 </ResponsiveContainer>
                 </div>
                 <div className='year-select'>
-                    <label className='year-select-label'>Order Status</label>
+                    <label className='year-select-label'>Trạng thái dơn hàng</label>
                     <OrderStatusChart orderStatusData={orderStatusData} />
                 </div>
             </div>

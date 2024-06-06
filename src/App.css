@@ -55,10 +55,11 @@ body {
 /* End Header */
 
 /* Sidebar */
+
 #sidebar {
   grid-area: sidebar;
   height: 100%;
-  background-color: #0007d5fe;
+  background-color: #08da82fe;
   overflow-y: auto;
   transition: all 0.5s;
   -webkit-transition: all 0.5s;
@@ -93,13 +94,13 @@ body {
 }
 
 .sidebar-list-item:hover {
-  background-color: rgba(82, 79, 79, 0.2);
+  background-color: rgba(118, 107, 107, 0.2);
   cursor: pointer;
 }
 
-.sidebar-list-item > a {
+.sidebar-list-item  {
   text-decoration: none;
-  color: #9e9ea4;
+  color: #ffffff;
 }
 
 .sidebar-responsive {
@@ -144,7 +145,7 @@ body {
 }
 
 .card:first-child {
-  background-color: #101217;
+  background-color: #d8d8d8;
 }
 
 .card:nth-child(2) {

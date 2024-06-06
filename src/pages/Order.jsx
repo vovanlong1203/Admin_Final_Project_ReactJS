@@ -1,9 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Table, Button, Form, Input } from 'semantic-ui-react'
-import { getOrder, updateStatusOrder} from '../api/service';
+import { Table, Button, Form, Input, Modal, Popup } from 'semantic-ui-react'
+import { getOrder, updateStatusOrder, searchOrder, getOrderItemDetail} from '../api/service';
 import { toast } from "react-toastify"
 import { ToastContainer } from "react-toastify"
 import "../assets/category.css"
+import { RiMoneyDollarCircleFill } from "react-icons/ri"
+import { FaRegCreditCard } from "react-icons/fa"
+import { generateInvoice } from './GenerateInvoice'
+import { IoSettingsOutline } from "react-icons/io5";
 
 function Order() {
 
@@ -12,8 +16,20 @@ function Order() {
     const [showUpdateForm, setShowUpdateForm] = useState(false)
     const [searchKeyword, setSearchKeyword] = useState("")
     const [filterOrder, setFilterOrder] = useState([])
-    const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-    const [itemsPerPage, setItemsPerPage] = useState(10); // Số mục trên mỗi trang
+    const [open, setOpen] = useState(false)
+    const [selectedOrder, setSelectedOrder] = useState(null)
+    const [orderItems, setOrderItems] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1)
+    const [itemsPerPage, setItemsPerPage] = useState(10) 
+    const [totalPages, setTotalPages] = useState(0)
+    const [openPopup, setOpenPopup] = useState(false)
+    const [popupProductId, setPopupProductId] = useState(null)
+  
+    const handleActionClick = (id) => {
+      setPopupProductId(id)
+      setOpenPopup(!openPopup)
+    }
+
 
     const nextStatuses = {
         UNCONFIRMED: ['CONFIRMED'],
@@ -21,29 +37,52 @@ function Order() {
         IN_TRANSIT: ['DELIVERED'],
         DELIVERED: ['DELIVERED'],
     };
+    
+    const handleClose = () => {
+        setOpen(false)
+        setSelectedOrder(null)
+    }
 
-    const indexOfLastItem = currentPage * itemsPerPage
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage
+    const handleViewDetails = async (order) => {
+        try {
+            setOpen(true)
+            const response = await getOrderItemDetail(order.id)
+            setSelectedOrder(order)
+            setOrderItems(response)
+            setOpenPopup(false)
+        } catch (error) {
+            console.log(error)
+            setSelectedOrder([]);
+        }
+    }
 
-    const currentOrder = filterOrder.slice(indexOfFirstItem, indexOfLastItem)
-    const totalPages = Math.ceil(filterOrder.length / itemsPerPage)
 
     const goToPreviousPage = () => {
-        setCurrentPage(prevPage => Math.max(prevPage - 1, 1));
-    };
+        if (currentPage > 1) {
+            const newPage = currentPage - 1
+            setCurrentPage(newPage)
+            fetchOrder(newPage, itemsPerPage, searchKeyword)
+          }
+    }
 
     const goToNextPage = () => {
-        setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages));
-    };
+        if (currentPage < totalPages) {
+          const newPage = currentPage + 1
+          setCurrentPage(newPage)
+          fetchOrder(newPage, itemsPerPage, searchKeyword)
+        }
+      }
 
-    const goToPage = (pageNumber) => {
-        setCurrentPage(pageNumber);
-    };
+      const goToPage = (pageNumber) => {
+        setCurrentPage(pageNumber)
+        fetchOrder(pageNumber, itemsPerPage, searchKeyword)
+      }
+    
 
     const renderPaginationButtons = () => {
-        const pageNumbers = [];
+        const pageNumbers = []
         for (let i = 1; i <= totalPages; i++) {
-            pageNumbers.push(i);
+            pageNumbers.push(i)
         }
         return (
             <div>
@@ -58,25 +97,25 @@ function Order() {
                     </Button>
                 ))}
                 <Button color='purple' onClick={goToNextPage} disabled={currentPage === totalPages}>Next</Button>
-
             </div>
         );
     };
 
-    const fetchOrder = async () => {
+    const fetchOrder = async (page = currentPage, limit = itemsPerPage, keyword = searchKeyword) => {
         try {
-            const orderData = await getOrder()
+            const orderData = await searchOrder(keyword, page, limit)
             console.log(orderData)
-            setOrder(orderData)
-            setFilterOrder(orderData)
+            setFilterOrder(orderData.items)
+            setTotalPages(orderData.totalPages)
+            localStorage.setItem("orders", JSON.stringify(orderData.items))
         } catch (error) {
             console.log(error)
         }
     }
 
     useEffect(() => {
-        fetchOrder()
-    }, [])
+        fetchOrder(currentPage,itemsPerPage,searchKeyword)
+    }, [currentPage])
 
 
     const handleStatusClick = async (id, status) => {
@@ -85,10 +124,10 @@ function Order() {
         }
         const response = await updateStatusOrder(id, data)
         if (response.status == 200) {
-            fetchOrder()
-            toast.success(`update status ${status}  order successfully`)
+            await fetchOrder(currentPage, itemsPerPage, searchKeyword);
+            toast.success(`câp nhật trạng thái đơn hàng thành công!`)
         } else {
-            toast.error("failed update status order")
+            toast.error("câp nhật trạng thái đơn hàng thất bại!")
         }
     }
 
@@ -105,37 +144,36 @@ function Order() {
             case 'DELIVERED':
                 return 'green';
             default:
-                return 'grey'; // default color
+                return 'grey'; 
         }
     }
 
     const getStatusButtonStyle = () => {
         return {
-            width: '100px', // hoặc kích thước bạn muốn
-            height: '40px', // hoặc kích thước bạn muốn
+            width: '100px', 
+            height: '40px',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
         };
     };
 
-    const handleSearch = () => {
-        const keyword = searchKeyword.toLowerCase()
-
-        const filtered = order.filter((pro) => 
-            pro.customer.toLowerCase().includes(keyword) ||
-            pro.phone_number.toLowerCase().includes(keyword) ||
-            pro.payment_method.toLowerCase().includes(keyword) ||
-            pro.status.toLowerCase().includes(keyword) 
-        )
-        setFilterOrder(filtered)
+    const handleSearch = async () => {
+        try {
+            const keyword = searchKeyword.toLowerCase()
+            const filtered = await searchOrder(keyword, currentPage, itemsPerPage);
+            setFilterOrder(filtered.items)
+            setTotalPages(filtered.totalPages)
+        } catch (error) {
+            console.log(error)
+        }
     }
 
   return (
     <div className='main-container'>
         <div className={`main-container ${showUpdateForm || showAddForm ? 'blur-background' : ''}`}>
             <center>
-                <h2 className="text-center">Order List</h2>
+                <h2 className="text-center">Quản lí đơn hàng</h2>
             </center>
             <br />
 
@@ -149,35 +187,38 @@ function Order() {
                 />
                 <Button primary type='button' 
                 onClick={handleSearch}
-                >Search</Button>
+                >Tìm kiếm</Button>
             </div>
 
             <div>
             <Table singleLine>
                 <Table.Header>
                     <Table.Row>
-                    <Table.HeaderCell>Id</Table.HeaderCell>
-                    <Table.HeaderCell>Customer</Table.HeaderCell>
-                    <Table.HeaderCell>Phone_number</Table.HeaderCell>
-                    <Table.HeaderCell>Total_amount</Table.HeaderCell>
-                    <Table.HeaderCell>Payment_method</Table.HeaderCell>
-                    <Table.HeaderCell>Shipping_address</Table.HeaderCell>
-                    <Table.HeaderCell>order_date</Table.HeaderCell>
-                    <Table.HeaderCell>Status</Table.HeaderCell>
-                    <Table.HeaderCell>Action</Table.HeaderCell>
+                    <Table.HeaderCell>ID</Table.HeaderCell>
+                    <Table.HeaderCell>Khách hàng</Table.HeaderCell>
+                    <Table.HeaderCell>Sô điện thoại</Table.HeaderCell>
+                    <Table.HeaderCell>Tổng tiền</Table.HeaderCell>
+                    <Table.HeaderCell className="break-word">Phương thức thanh toán</Table.HeaderCell>
+                    <Table.HeaderCell>Địa chỉ </Table.HeaderCell>
+                    <Table.HeaderCell>Ngày đặt hàng</Table.HeaderCell>
+                    <Table.HeaderCell>Trạng thái</Table.HeaderCell>
+                    <Table.HeaderCell>Cập nhật trạng thái</Table.HeaderCell>
+                    <Table.HeaderCell>Hành động</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
                 
                 <Table.Body>
                     {
-                        currentOrder.map((item) => {
+                        filterOrder.map((item) => {
                             return (
                                 <Table.Row key={item.id}>
                                     <Table.Cell>{item.id}</Table.Cell>
                                     <Table.Cell>{item.customer}</Table.Cell>
                                     <Table.Cell>{item.phone_number}</Table.Cell>
                                     <Table.Cell>{item.total_amount}</Table.Cell>
-                                    <Table.Cell className="break-word">{item.payment_method}</Table.Cell>
+                                    <Table.Cell className="break-word">
+                                        {item.payment_method === 'CASH' ? <RiMoneyDollarCircleFill style={{ fontSize: '40px' }}/> : <FaRegCreditCard  style={{ fontSize: '40px' }}/>}
+                                    </Table.Cell>
                                     <Table.Cell className="break-word">{item.shipping_address}</Table.Cell>
                                     <Table.Cell className="break-word">{item.order_date}</Table.Cell>
                                     <Table.Cell>
@@ -203,7 +244,21 @@ function Order() {
                                             </>
                                         ) : ''}
                                     </Table.Cell>
-
+                                    <Table.Cell>
+                                        <Popup
+                                            trigger={<Button color='orange' onClick={() => handleActionClick(item.id)}><IoSettingsOutline /> Hành động</Button>}
+                                            content={
+                                            <div>
+                                                <Button color='green' onClick={() => handleViewDetails(item)}>Chi tiết</Button>
+                                                <Button color='google plus' onClick={() => generateInvoice(item)}>Hóa đơn</Button>
+                                            </div>
+                                            }
+                                            on='click'
+                                            open={popupProductId === item.id && openPopup}
+                                            onClose={() => setOpenPopup(false)}
+                                            position='bottom left'
+                                        />
+                                    </Table.Cell>
                                 </Table.Row>
                             )
                         })
@@ -215,6 +270,38 @@ function Order() {
             {renderPaginationButtons()}
         </div>
         <ToastContainer />
+        {selectedOrder && (
+                <Modal open={open} onClose={handleClose}>
+                    <Modal.Header >Chi tiết đặt hàng</Modal.Header>
+                    <Modal.Content>
+                        <Table>
+                            <Table.Header>
+                                <Table.Row>
+                                    <Table.HeaderCell>Sản phẩm</Table.HeaderCell>
+                                    <Table.HeaderCell>Giá</Table.HeaderCell>
+                                    <Table.HeaderCell>Số lượng</Table.HeaderCell>
+                                    <Table.HeaderCell>Size</Table.HeaderCell>
+                                </Table.Row>
+                            </Table.Header>
+                            <Table.Body>
+                                    {
+                                        orderItems.map((item) => (
+                                            <Table.Row>
+                                                <Table.Cell>{item.product}</Table.Cell>
+                                                <Table.Cell>{item.price}</Table.Cell>
+                                                <Table.Cell>{item.quantity}</Table.Cell>
+                                                <Table.Cell>{item.size}</Table.Cell>
+                                            </Table.Row>
+                                        ))
+                                    }
+                            </Table.Body>
+                        </Table>
+                    </Modal.Content>
+                    <Modal.Actions>
+                        <Button onClick={handleClose}>Đóng</Button>
+                    </Modal.Actions>
+                </Modal>
+            )}
     </div>
   )
 }

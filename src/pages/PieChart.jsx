@@ -1,12 +1,10 @@
-import React from 'react';
-import { Doughnut } from 'react-chartjs-2';
+import React from 'react'
+import { Doughnut } from 'react-chartjs-2'
 
 const OrderStatusChart = ({ orderStatusData }) => {
-    // Dữ liệu mẫu về số lượng đơn hàng theo trạng thái
-    const labels = Object.keys(orderStatusData);
-    const values = Object.values(orderStatusData);
+    const labels = Object.keys(orderStatusData)
+    const values = Object.values(orderStatusData)
 
-    // Dữ liệu cho biểu đồ
     const data = {
         labels: labels,
         datasets: [
@@ -16,13 +14,15 @@ const OrderStatusChart = ({ orderStatusData }) => {
                     '#FF6384',
                     '#36A2EB',
                     '#FFCE56',
-                    '#4CAF50' // Thêm các màu sắc khác tùy ý
+                    '#4CAF50',
+                    '#36CAF4' 
                 ],
                 hoverBackgroundColor: [
                     '#FF6384',
                     '#36A2EB',
                     '#FFCE56',
-                    '#4CAF50' // Thêm các màu sắc hover tùy ý
+                    '#4CAF50',
+                    '#36CAF4'
                 ]
             }
         ]

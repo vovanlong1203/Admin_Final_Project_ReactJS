@@ -4,6 +4,7 @@ import { getVoucher, addVoucher, deleteVoucher} from '../api/service';
 import { toast } from "react-toastify"
 import { ToastContainer } from "react-toastify"
 import "../assets/category.css"
+import { MdOutlineDelete } from "react-icons/md";
 
 function Voucher() {
 
@@ -134,7 +135,7 @@ function Voucher() {
     <div className='main-container'>
         <div className={`main-container ${showUpdateForm || showAddForm ? 'blur-background' : ''}`}>
             <center>
-                <h2 className="text-center">Promotion Management</h2>
+                <h2 className="text-center">Quản lí voucher</h2>
             </center>  
             <div style={{ display: 'flex' ,justifyContent : 'space-between'}}>
                 <div className="row" style={{marginBottom: '20px'}}>
@@ -147,29 +148,29 @@ function Voucher() {
                     />
                     <Button primary type='button' 
                     onClick={handleSearch}
-                    >Search</Button>
+                    >Tìm kiếm</Button>
                 </div>
                 <div className="row">
-                    <Button primary onClick={() => setShowAddForm(true)}>Add Voucher</Button>
+                    <Button primary onClick={() => setShowAddForm(true)}>Thêm Voucher</Button>
                 </div>
             </div>
             <div>
             <Table singleLine>
                 <Table.Header>
                     <Table.Row>
-                        <Table.HeaderCell>Id</Table.HeaderCell>
-                        <Table.HeaderCell >minimum purchase amount</Table.HeaderCell>
-                        <Table.HeaderCell>usage count</Table.HeaderCell>
-                        <Table.HeaderCell>usage limit</Table.HeaderCell>
-                        <Table.HeaderCell>voucher value</Table.HeaderCell>
-                        <Table.HeaderCell>Start_at</Table.HeaderCell>
-                        <Table.HeaderCell>End_at</Table.HeaderCell>
-                        <Table.HeaderCell>code</Table.HeaderCell>
-                        <Table.HeaderCell>discount type</Table.HeaderCell>
-                        <Table.HeaderCell>voucher type</Table.HeaderCell>
+                        <Table.HeaderCell >ID</Table.HeaderCell>
+                        <Table.HeaderCell className="break-word">Số tiền mua tối thiểu</Table.HeaderCell>
+                        <Table.HeaderCell >Số lượng sử dụng</Table.HeaderCell>
+                        <Table.HeaderCell >giới hạn sử dụng</Table.HeaderCell>
+                        <Table.HeaderCell className="break-word">giá trị giảm giá</Table.HeaderCell>
+                        <Table.HeaderCell className="break-word">Ngày bắt đầu</Table.HeaderCell>
+                        <Table.HeaderCell className="break-word">Ngày kết thúc</Table.HeaderCell>
+                        <Table.HeaderCell className="break-word">code</Table.HeaderCell>
+                        <Table.HeaderCell>Thể loại giảm</Table.HeaderCell>
+                        <Table.HeaderCell>Thể loại voucher</Table.HeaderCell>
                         <Table.HeaderCell>maxDiscountValue</Table.HeaderCell>
-                        <Table.HeaderCell>active</Table.HeaderCell>
-                        <Table.HeaderCell>Action</Table.HeaderCell>
+                        <Table.HeaderCell>Trạng thái</Table.HeaderCell>
+                        <Table.HeaderCell>Xóa</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
 
@@ -191,9 +192,7 @@ function Voucher() {
                                     <Table.Cell>{pro.maxDiscountValue}</Table.Cell>
                                     <Table.Cell>{pro.active}</Table.Cell>
                                     <Table.Cell>
-                                        <Button color="red" onClick={() => handleDeleteVoucher(pro.id)}>
-                                            Delete
-                                        </Button>
+                                        <Button color='red' onClick={() => handleDelete(pro.id)}><MdOutlineDelete style={{fontSize: '20px'}}/></Button>
                                     </Table.Cell>
                                 </Table.Row>
                             )
@@ -210,11 +209,11 @@ function Voucher() {
         {showAddForm && (
             <div ref={addFormRef} className="add-form-container">
                 <center>
-                <h2 className="text-center">Add Voucher</h2>
+                <h2 className="text-center">Thêm voucher</h2>
                 </center>
                 <Form onSubmit={handleAddFormSubmit} style={{ width: '400px', height: '600px' }}>
                 <Form.Field>
-                    <label>minimum purchase amount</label>
+                    <label>Số tiền mua tối thiểu</label>
                     <Input
                     type="number"
                     step="0.1"
@@ -228,7 +227,7 @@ function Voucher() {
                     />
                 </Form.Field>
                 <Form.Field>
-                    <label>usage count</label>
+                    <label>Số lượng sử dụng</label>
                     <Input
                     type="number"
                     value={newVoucher.usage_count}
@@ -241,7 +240,7 @@ function Voucher() {
                     />
                 </Form.Field>
                 <Form.Field>
-                    <label>usage limit</label>
+                    <label>giới hạn sử dụng</label>
                     <Input
                     type="number"
                     value={newVoucher.usage_limit}
@@ -254,7 +253,7 @@ function Voucher() {
                     />
                 </Form.Field>
                 <Form.Field>
-                    <label>voucher value</label>
+                    <label>giá trị giảm giá</label>
                     <Input
                     type="number"
                     value={newVoucher.voucher_value}
@@ -280,7 +279,7 @@ function Voucher() {
                     />
                 </Form.Field>
                 <Form.Field>
-                    <label>Start at</label>
+                    <label>Ngày bắt đầu</label>
                     <Input
                     type="datetime-local"
                     value={newVoucher.start_at ? new Date(newVoucher.start_at).toISOString().slice(0, 16) : ''}
@@ -293,7 +292,7 @@ function Voucher() {
                     />
                 </Form.Field>
                 <Form.Field>
-                    <label>End at</label>
+                    <label>Ngày kết thúc</label>
                     <Input
                     type="datetime-local"
                     value={newVoucher.end_at ? new Date(newVoucher.end_at).toISOString().slice(0, 16) : ''}
@@ -307,7 +306,7 @@ function Voucher() {
                 </Form.Field>
 
                 <Form.Field>
-                    <label>Discount Type</label>
+                    <label>Thể loại giảm</label>
                     <Form.Select
                     options={[
                         { key: 'AMOUNT', value: 'AMOUNT', text: 'AMOUNT' },
@@ -322,7 +321,7 @@ function Voucher() {
                     /> 
                 </Form.Field>
                 <Form.Field>
-                    <label>Voucher Type</label>
+                    <label>Thể loại voucher</label>
                     <Form.Select
                     options={[
                         { key: 'PURCHASE', value: 'PURCHASE', text: 'PURCHASE' },
@@ -350,7 +349,7 @@ function Voucher() {
                     />
                 </Form.Field>
                 <Form.Field>
-                    <label>active</label>
+                    <label>Trạng thái</label>
                     <Form.Select
                     options={[
                         { key: 0, value: 0, text: 0 },

@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Table, Button, Form, Input, Tab } from 'semantic-ui-react';
-import { getProducts, getCategory, getSize, getPromotionsValid, addProduct, updateProduct, deleteProduct } from '../api/service';
-import { toast } from "react-toastify";
-import { ToastContainer } from "react-toastify";
+import React, { useEffect, useState, useRef } from 'react'
+import { Table, Button, Form, Input, Modal, Dropdown, Popup  } from 'semantic-ui-react'
+import { getProduct, getCategory, getSize, getPromotionsValid, addProduct, updateProduct, deleteProduct, searchProducts } from '../api/service'
+import { toast } from "react-toastify"
+import { ToastContainer } from "react-toastify"
 import "../assets/category.css"
+import { IoSettingsOutline } from "react-icons/io5"
 
 function Product() {
 
@@ -23,30 +24,36 @@ function Product() {
       price: 0,
       category: "",
       promotion: ""
-  });
+  })
   const updateFormRef = useRef(null)
   const addFormRef = useRef(null)
-  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-  const [itemsPerPage, setItemsPerPage] = useState(10); // Số mục trên mỗi trang
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [totalPages, setTotalPages] = useState(0)
+  const [openPopup, setOpenPopup] = useState(false)
+  const [popupProductId, setPopupProductId] = useState(null)
+
+  const handleActionClick = (id) => {
+    setPopupProductId(id)
+    setOpenPopup(!openPopup)
+  }
 
   const indexOfLastItem = currentPage * itemsPerPage
   const indexOfFirstItem = indexOfLastItem - itemsPerPage
 
   const currentPromotion = filteredProduct.slice(indexOfFirstItem, indexOfLastItem)
-  const totalPages = Math.ceil(filteredProduct.length / itemsPerPage)
 
-  
-  const fetchProduct = async () => {
+  const fetchProduct = async (page = currentPage, limit = itemsPerPage, keyword = searchKeyword) => {
     try {
-      const productData = await getProducts()
-      setProduct(productData)
-      setFilteredProduct(productData)
-
-      localStorage.setItem("products", JSON.stringify(productData))
+      const productData = await searchProducts(keyword, page, limit)
+      setProduct(productData.items)
+      setFilteredProduct(productData.items)
+      setTotalPages(productData.totalPages)
+      localStorage.setItem("products", JSON.stringify(productData.items))
     } catch (error) {
       console.log(error)
     }
-  }
+  };
 
   const fetchPromotionValid = async () => {
     try {
@@ -84,26 +91,27 @@ function Product() {
       await addProduct(newProduct)
       fetchProduct()
       setShowAddForm(false)
-      localStorage.setItem('products', JSON.stringify(product));
-      toast.success("add item successfully!")
+      localStorage.setItem('products', JSON.stringify(product))
+      toast.success("Thêm mới thành công!")
     } catch (error) {
       console.log(error)
+      toast.error("Thêm thất bại!")
     }
   }
 
   const handleUpdate = (id) => {
-    const selected = product.find((pro) => pro.id === id);
-    const selectedCategory = categories.find((category) => category.name === selected.category);
-    const selectedPromotion = promotionValid.find((item) => item.description == selected.promotion);
+    const selected = product.find((pro) => pro.id === id)
+    const selectedCategory = categories.find((category) => category.name === selected.category)
+    const selectedPromotion = promotionValid.find((item) => item.description == selected.promotion)
 
-    const categoryValue = selectedCategory ? selectedCategory.name : selected.category;
-    const promotionValue = selectedPromotion ? selectedPromotion.name : selected.promotion;
+    const categoryValue = selectedCategory ? selectedCategory.name : selected.category
+    const promotionValue = selectedPromotion ? selectedPromotion.name : selected.promotion
     setSelectedProduct({
         ...selected,
         category: categoryValue,
         promotion: promotionValue
     });
-
+    setOpenPopup(false)
     setShowUpdateForm(true)
     console.log("selectedProduct: ", selectedProduct)
   };
@@ -114,10 +122,10 @@ function Product() {
       await updateProduct(selectedProduct)
       fetchProduct()
       setShowUpdateForm(false)
-      localStorage.setItem('products', JSON.stringify(product));
+      localStorage.setItem('products', JSON.stringify(product))
       toast.success("add item successfully!")
     } catch(error) {
-        console.error('Error updating promotion:', error);
+        console.error('Error updating promotion:', error)
         toast.success(error)
     } 
   }
@@ -126,81 +134,88 @@ function Product() {
     try {
         await deleteProduct(id)
         fetchProduct()
-        localStorage.setItem('products', JSON.stringify(product));
-        toast.success("delete successfully!")
+        localStorage.setItem('products', JSON.stringify(product))
+        setOpenPopup(false)
+        toast.success("xóa thành công!")
     } catch (error) {
         console.log("error: ", error)
-        toast.success(error)
+        toast.error(error)
     }
   }
 
+  const handleSearch = async () => {
+    try {
+      const keyword = searchKeyword.toLowerCase()
+
+      const filtered = await searchProducts(keyword, currentPage, itemsPerPage)
+      setFilteredProduct(filtered.items)
+      setTotalPages(filtered.totalPages)
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      const newPage = currentPage - 1
+      setCurrentPage(newPage)
+      fetchProduct(newPage, itemsPerPage, searchKeyword)
+    }
+  }
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      const newPage = currentPage + 1
+      setCurrentPage(newPage)
+      fetchProduct(newPage, itemsPerPage, searchKeyword)
+    }
+  }
+
+  const goToPage = (pageNumber) => {
+    setCurrentPage(pageNumber)
+    fetchProduct(pageNumber, itemsPerPage, searchKeyword)
+  }
+
+  const renderPaginationButtons = () => {
+    const pageNumbers = []
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(i)
+    }
+    return (
+      <div>
+        <Button color='grey' onClick={goToPreviousPage} disabled={currentPage === 1}>Previous</Button>
+        {pageNumbers.map(number => (
+          <Button
+            key={number}
+            onClick={() => goToPage(number)}
+            disabled={currentPage === number}
+          >
+            {number}
+          </Button>
+        ))}
+        <Button color='purple' onClick={goToNextPage} disabled={currentPage === totalPages}>Next</Button>
+      </div>
+    )
+  }
+
   useEffect(() => {
-    fetchProduct()
+    fetchProduct(currentPage, itemsPerPage,searchKeyword)
     getCateogries()
     getSizes()
     fetchPromotionValid()
-  },[])
-
-  const handleSearch = () => {
-    const keyword = searchKeyword.toLowerCase()
-
-    const filtered = product.filter((pro) => 
-      pro.name.toLowerCase().includes(keyword) ||
-      pro.description.toLowerCase().includes(keyword) 
-    )
-
-    setFilteredProduct(filtered)
-  }
-
-  const goToPreviousPage = () => {
-    setCurrentPage(prevPage => Math.max(prevPage - 1, 1));
-  };
-
-  const goToNextPage = () => {
-    setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages));
-  };
-
-  const goToPage = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
-  const renderPaginationButtons = () => {
-    const pageNumbers = [];
-    for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(i);
-    }
-    return (
-        <div>
-            <Button color='grey' onClick={goToPreviousPage} disabled={currentPage === 1}>Previous</Button>
-            {pageNumbers.map(number => (
-                <Button
-                    key={number}
-                    onClick={() => goToPage(number)}
-                    disabled={currentPage === number}
-                >
-                    {number}
-                </Button>
-            ))}
-            <Button color='purple' onClick={goToNextPage} disabled={currentPage === totalPages}>Next</Button>
-
-        </div>
-    );
-};
-
-  useEffect(() => {
-    console.log("selectedProduct: ", selectedProduct);
-}, [selectedProduct]);
+  }, [currentPage]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
         if (addFormRef.current && !addFormRef.current.contains(event.target)) {
-            setShowAddForm(false);
+            setShowAddForm(false)
         }
       }
 
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('mousedown', handleClickOutside)
       return () => {
-          document.removeEventListener('mousedown', handleClickOutside);
+          document.removeEventListener('mousedown', handleClickOutside)
       };
   }, [])
 
@@ -222,7 +237,7 @@ function Product() {
     <div className='main-container'>
       <div className={`main-container ${showUpdateForm || showAddForm ? 'blur-background' : ''}`}>
         <center>
-          <h2>Product Management</h2>  
+          <h2>Quản lí sản phẩm</h2>  
         </center>
         <div style={{ display: 'flex' ,justifyContent : 'space-between'}}>
           <div style={{marginBottom: '20px'}}>
@@ -235,11 +250,11 @@ function Product() {
             />
             <Button primary type='button' 
             onClick={handleSearch}
-            >Search</Button>
+            >Tìm kiếm</Button>
         </div>        
 
           <div >
-            <Button primary onClick={() => setShowAddForm(true)}>Add Product</Button>
+            <Button primary onClick={() => setShowAddForm(true)}>Thêm Sản Phẩm</Button>
           </div>
           
         </div>
@@ -248,32 +263,43 @@ function Product() {
         <Table singleLine>
           <Table.Header>
               <Table.Row>
-                  <Table.HeaderCell>Id</Table.HeaderCell>
-                  <Table.HeaderCell>Name</Table.HeaderCell>
-                  <Table.HeaderCell>Description</Table.HeaderCell>
-                  <Table.HeaderCell>Status</Table.HeaderCell>
-                  <Table.HeaderCell>Price</Table.HeaderCell>
-                  <Table.HeaderCell>Category</Table.HeaderCell>
-                  <Table.HeaderCell>Promotion</Table.HeaderCell>
-                  <Table.HeaderCell>Action</Table.HeaderCell>
+                  <Table.HeaderCell>ID</Table.HeaderCell>
+                  <Table.HeaderCell>Tên SP</Table.HeaderCell>
+                  <Table.HeaderCell>Mô Tả</Table.HeaderCell>
+                  <Table.HeaderCell>Trạng Thái</Table.HeaderCell>
+                  <Table.HeaderCell>Giá</Table.HeaderCell>
+                  <Table.HeaderCell>Loại</Table.HeaderCell>
+                  <Table.HeaderCell>Khuyến mãi</Table.HeaderCell>
+                  <Table.HeaderCell>Hành động</Table.HeaderCell>
               </Table.Row>
             </Table.Header>
 
             <Table.Body>
               {
-                currentPromotion.map((pro) => {
+                filteredProduct.map((pro) => {
                   return (
                     <Table.Row key={pro.id}>
                       <Table.Cell>{pro.id}</Table.Cell>
                       <Table.Cell className="break-word">{pro.name}</Table.Cell>
                       <Table.Cell className="break-word">{pro.description}</Table.Cell>
-                      <Table.Cell>{pro.status == 1 ? "True" : "False"}</Table.Cell>
+                      <Table.Cell>{pro.status == 1 ? "Hiển thị" : "Ko hiển thị"}</Table.Cell>
                       <Table.Cell>{pro.price}</Table.Cell>
                       <Table.Cell>{pro.category}</Table.Cell>
                       <Table.Cell>{pro.promotion}</Table.Cell>
                       <Table.Cell>
-                        <Button primary onClick={() => handleUpdate(pro.id)}> Update </Button>
-                        <Button color='red' onClick={() =>  handleDelete(pro.id)}> Delete </Button>
+                        <Popup
+                            trigger={<Button color='orange' onClick={() => handleActionClick(pro.id)}> <IoSettingsOutline /> Hành động</Button>}
+                            content={
+                              <div>
+                                <Button primary onClick={() => handleUpdate(pro.id)}>Cập nhật</Button>
+                                <Button color='red' onClick={() => handleDelete(pro.id)}>Xóa</Button>
+                              </div>
+                            }
+                            on='click'
+                            open={popupProductId === pro.id && openPopup}
+                            onClose={() => setOpenPopup(false)}
+                            position='bottom left'
+                          />
                       </Table.Cell>
                     </Table.Row>
                   )
@@ -289,11 +315,11 @@ function Product() {
       {showUpdateForm && selectedProduct && (
         <div ref={updateFormRef} className="update-form-container">
             <center>
-                <h2 className="text-center">Update Product</h2>
+                <h2 className="text-center">Cập nhật sản phẩm</h2>
             </center>
             <Form style={{ width: '400px' }}>
                 <Form.Field>
-                    <label>Name</label>
+                    <label>Tên SP</label>
                     <Input
                         type="text"
                         value={selectedProduct.name}
@@ -306,7 +332,7 @@ function Product() {
                     />
                 </Form.Field>
                 <Form.Field>
-                    <label>Description</label>
+                    <label>Mô tả</label>
                     <Input
                         type="text"
                         value={selectedProduct.description}
@@ -319,7 +345,7 @@ function Product() {
                     />
                 </Form.Field>
                 <Form.Field>
-                    <label>Status</label>
+                    <label>Trạng thái</label>
                     <Form.Select
                     options={[
                         { key: 1, value: true, text: 'True' },
@@ -335,7 +361,7 @@ function Product() {
                     />
                 </Form.Field>
                 <Form.Field>
-                    <label>Price</label>
+                    <label>Giá </label>
                     <Input
                         type="number"
                         value={selectedProduct.price}
@@ -347,56 +373,56 @@ function Product() {
                         } required
                     /> 
                 </Form.Field>
-<Form.Field>
-    <label>Category</label>
-    <Form.Select
-        options={categories.map(category => ({
-            key: category.id,
-            value: category.name,
-            text: category.name,
-        }))}
-        value={selectedProduct.category}
-        onChange={(e, { value }) => {
-            const selectedCategory = categories.find(category => category.name === value);
-            
-            setSelectedProduct({
-                ...selectedProduct,
-                category: selectedCategory ? selectedCategory.name : null,
-            })
-            
-        }}
-        required
-    />
-</Form.Field>
-<Form.Field>
-    <label>Promotion</label>
-    <Form.Select
-        options={[
-            { key: '', value: 'null', text: 'null' }, 
-            ...promotionValid.map(promotion => ({
-                key: promotion.id,
-                value: promotion.name,
-                text: promotion.name
-            }))
-        ]}
-        value={selectedProduct.promotion}
-        onChange={(e, { value }) => {
-            const selectedPromotion = promotionValid.find(promotion => promotion.name === value);
-            
-            setSelectedProduct({
-                ...selectedProduct,
-                promotion: selectedPromotion ? selectedPromotion.name : null,
-            });
-            
-        }} 
-    />
-</Form.Field>
+                <Form.Field>
+                    <label>Loại</label>
+                    <Form.Select
+                        options={categories.map(category => ({
+                            key: category.id,
+                            value: category.name,
+                            text: category.name,
+                        }))}
+                        value={selectedProduct.category}
+                        onChange={(e, { value }) => {
+                            const selectedCategory = categories.find(category => category.name === value);
+                            
+                            setSelectedProduct({
+                                ...selectedProduct,
+                                category: selectedCategory ? selectedCategory.name : null,
+                            })
+                            
+                        }}
+                        required
+                    />
+                </Form.Field>
+                <Form.Field>
+                    <label>Khuyễn mãi</label>
+                    <Form.Select
+                        options={[
+                            { key: '', value: 'null', text: 'null' }, 
+                            ...promotionValid.map(promotion => ({
+                                key: promotion.id,
+                                value: promotion.name,
+                                text: promotion.name
+                            }))
+                        ]}
+                        value={selectedProduct.promotion}
+                        onChange={(e, { value }) => {
+                            const selectedPromotion = promotionValid.find(promotion => promotion.name === value);
+                            
+                            setSelectedProduct({
+                                ...selectedProduct,
+                                promotion: selectedPromotion ? selectedPromotion.name : null,
+                            });
+                            
+                        }} 
+                    />
+                </Form.Field>
                 <Form.Field style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Button primary type="button" onClick={handleFormSubmitUpdate}>
-                        Save
+                        Cập nhật
                     </Button>
                     <Button color='red' onClick={() => setShowUpdateForm(false)}>
-                        Cancel
+                        Hủy bỏ
                     </Button>
                 </Form.Field>
             </Form>
@@ -407,11 +433,11 @@ function Product() {
       {showAddForm && (
             <div ref={addFormRef} className="add-form-container">
                 <center>
-                <h2 className="text-center">Add Product</h2>
+                <h2 className="text-center">Thêm sản phẩm</h2>
                 </center>
                 <Form onSubmit={handleAddFormSubmit} style={{ width: '400px' }}>
                 <Form.Field>
-                    <label>Name</label>
+                    <label>Tên SP</label>
                     <Input
                     type="text"
                     value={newProduct.name}
@@ -424,7 +450,7 @@ function Product() {
                     />
                 </Form.Field>
                 <Form.Field>
-                    <label>Description</label>
+                    <label>Mô tả</label>
                     <Input
                     type="text"
                     value={newProduct.description}
@@ -437,7 +463,7 @@ function Product() {
                     />
                 </Form.Field>
                 <Form.Field>
-                    <label>Status</label>
+                    <label>Trạng thái</label>
                     <Form.Select
                     options={[
                       { key: 1, value: true, text: 'True' },
@@ -453,7 +479,7 @@ function Product() {
                     />
                 </Form.Field>
                 <Form.Field>
-                    <label>Price</label>
+                    <label>Giá</label>
                     <Input
                         type="number"
                         value={newProduct.price}
@@ -466,7 +492,7 @@ function Product() {
                     /> 
                 </Form.Field>
                 <Form.Field>
-                    <label>Category</label>
+                    <label>Loại</label>
                     <Form.Select
                     options={categories.map(category => ({
                       key: category.id,
@@ -483,7 +509,7 @@ function Product() {
                     />
                 </Form.Field>                
                 <Form.Field>
-                    <label>Promotion</label>
+                    <label>Khuyến mãi</label>
                     <Form.Select
                     options={[
                         { key: '', value: 'null', text: 'null' }, 
@@ -504,10 +530,10 @@ function Product() {
                 </Form.Field>
                 <Form.Field style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Button primary type="submit">
-                    Add
+                      Thêm 
                     </Button>
                     <Button color='red' onClick={() => setShowAddForm(false)}>
-                    Cancel
+                      Hủy bỏ
                     </Button>
                 </Form.Field>
                 </Form>
@@ -519,3 +545,5 @@ function Product() {
 }
 
 export default Product
+
+

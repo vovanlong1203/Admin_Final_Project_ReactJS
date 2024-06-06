@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Table, Button, Form, Input } from 'semantic-ui-react';
+import { Table, Button, Form, Input, Popup } from 'semantic-ui-react';
 import { getPromotions, addPromotion, updatePromotions, deletePromtion } from '../api/service';
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
 import '../assets/promotion.css';
-
+import { IoSettingsOutline } from "react-icons/io5";
 
 function Promotion() {
     const [promotion, setPromotion] = useState([])
@@ -15,9 +15,18 @@ function Promotion() {
     const [selectedPromotion, setSelectedPromotion] = useState(null)
     const updateFormRef = useRef(null)
     const addFormRef = useRef(null)
-    const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-    const [itemsPerPage, setItemsPerPage] = useState(10); // Số mục trên mỗi trang
+    const [currentPage, setCurrentPage] = useState(1)
+    const [itemsPerPage, setItemsPerPage] = useState(10) 
 
+    const [openPopup, setOpenPopup] = useState(false)
+    const [popupProductId, setPopupProductId] = useState(null)
+    
+    const handleActionClick = (id) => {
+        setPopupProductId(id)
+        setOpenPopup(!openPopup)
+      }
+
+      
     const indexOfLastItem = currentPage * itemsPerPage
     const indexOfFirstItem = indexOfLastItem - itemsPerPage
 
@@ -25,21 +34,21 @@ function Promotion() {
     const totalPages = Math.ceil(filteredPromotion.length / itemsPerPage)
 
     const goToPreviousPage = () => {
-        setCurrentPage(prevPage => Math.max(prevPage - 1, 1));
-    };
+        setCurrentPage(prevPage => Math.max(prevPage - 1, 1))
+    }
 
     const goToNextPage = () => {
-        setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages));
-    };
+        setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages))
+    }
 
     const goToPage = (pageNumber) => {
-        setCurrentPage(pageNumber);
-    };
+        setCurrentPage(pageNumber)
+    }
 
     const renderPaginationButtons = () => {
-        const pageNumbers = [];
+        const pageNumbers = []
         for (let i = 1; i <= totalPages; i++) {
-            pageNumbers.push(i);
+            pageNumbers.push(i)
         }
         return (
             <div>
@@ -69,8 +78,8 @@ function Promotion() {
         }
     };
     useEffect(() => {
-        fetchPromotion();
-    }, []);
+        fetchPromotion()
+    }, [])
 
     const [newPromotion, setNewPromotion] = useState({
         name: "",
@@ -79,13 +88,14 @@ function Promotion() {
         discount_value: 0,
         start_at: "",
         end_at: ""
-      });
+      })
 
     const handleUpdate = (id) => {
         const selected = promotion.find((pro) => pro.id === id)
         console.log("selected: ", selected)
         setSelectedPromotion(selected)
         setShowUpdateForm(true)
+        setOpenPopup(false)
     }
 
     const handleAddFormSubmit = async () => {
@@ -95,7 +105,7 @@ function Promotion() {
             fetchPromotion()
             setShowAddForm(false)
             localStorage.setItem('promotions', JSON.stringify(promotion));
-            toast.success("add item successfully!")
+            toast.success("Thêm thành công!")
         } catch(error) {
             console.error('Error updating promotion:', error);
             toast.success(error)
@@ -116,23 +126,22 @@ function Promotion() {
             console.info("data : ", data)
             console.info("selectedPromotion.id: ", selectedPromotion.id)
             await updatePromotions(selectedPromotion.id, data)
-            console.log('Promotion updated successfully!');
+            console.log('Promotion updated successfully!')
     
-            // Reset form and hide update form
             setShowUpdateForm(false);
             setSelectedPromotion(null);
             
             const updatedPromotionList = promotion.map(promo => {
                 if (promo.id === selectedPromotion.id) {
-                    return selectedPromotion;
+                    return selectedPromotion
                 }
-                return promo;
+                return promo
             });
     
             setPromotion(updatedPromotionList);
             fetchPromotion()
             localStorage.setItem('promotions', JSON.stringify(promotion));
-            toast.success("update successfully!")
+            toast.success("cập nhật thành công!")
         } catch(error) {
             console.error('Error updating promotion:', error);
             toast.error(error)
@@ -143,8 +152,9 @@ function Promotion() {
         try {
             await deletePromtion(id)
             fetchPromotion()
-            localStorage.setItem('promotions', JSON.stringify(promotion));
-            toast.success("delete successfully!")
+            localStorage.setItem('promotions', JSON.stringify(promotion))
+            setOpenPopup(false)
+            toast.success("xóa thành công!")
         } catch (error) {
             console.log("error: ", error)
             toast.success(error)
@@ -157,19 +167,19 @@ function Promotion() {
             pro.name.toLowerCase().includes(keyword) ||
             pro.description.toLowerCase().includes(keyword)
         );
-        setFilteredPromotion(filtered);
+        setFilteredPromotion(filtered)
     };
 
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (addFormRef.current && !addFormRef.current.contains(event.target)) {
-                setShowAddForm(false);
+                setShowAddForm(false)
             }
         }
     
-        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('mousedown', handleClickOutside)
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('mousedown', handleClickOutside)
         };
     }, [])
 
@@ -191,7 +201,7 @@ function Promotion() {
         <div className='main-container'>
             <div className={`main-container ${showUpdateForm || showAddForm ? 'blur-background' : ''}`}>
                 <center>
-                    <h2 className="text-center">Promotion Management</h2>
+                    <h2 className="text-center">Quản lí khuyến mãi</h2>
                 </center>
                 <br />
                 <div style={{ display: 'flex' ,justifyContent : 'space-between'}}>
@@ -205,11 +215,11 @@ function Promotion() {
                         />
                         <Button primary type='button' 
                         onClick={handleSearch}
-                        >Search</Button>
+                        >Tim kiếm</Button>
                     </div>
 
                     <div className="row">
-                        <Button primary onClick={() => setShowAddForm(true)}>Add Promotion</Button>
+                        <Button primary onClick={() => setShowAddForm(true)}>Thêm khuyến mãi</Button>
                     </div>
                 </div>
                 <br />
@@ -217,14 +227,14 @@ function Promotion() {
                     <Table singleLine>
                         <Table.Header>
                             <Table.Row>
-                                <Table.HeaderCell>Id</Table.HeaderCell>
-                                <Table.HeaderCell>Name</Table.HeaderCell>
-                                <Table.HeaderCell>Description</Table.HeaderCell>
-                                <Table.HeaderCell>Is_active</Table.HeaderCell>
-                                <Table.HeaderCell>Discount_value</Table.HeaderCell>
-                                <Table.HeaderCell>Start_at</Table.HeaderCell>
-                                <Table.HeaderCell>End_at</Table.HeaderCell>
-                                <Table.HeaderCell>Action</Table.HeaderCell>
+                                <Table.HeaderCell>ID</Table.HeaderCell>
+                                <Table.HeaderCell>Tên khuyến mãi</Table.HeaderCell>
+                                <Table.HeaderCell>Mô tả</Table.HeaderCell>
+                                <Table.HeaderCell>Hoạt động</Table.HeaderCell>
+                                <Table.HeaderCell>Giảm giá</Table.HeaderCell>
+                                <Table.HeaderCell>Ngày bắt đầu </Table.HeaderCell>
+                                <Table.HeaderCell>Ngày kết thúc</Table.HeaderCell>
+                                <Table.HeaderCell>Hành động</Table.HeaderCell>
                             </Table.Row>
                         </Table.Header>
 
@@ -235,15 +245,24 @@ function Promotion() {
                                         <Table.Cell>{pro.id}</Table.Cell>
                                         <Table.Cell className="break-word">{pro.name}</Table.Cell>
                                         <Table.Cell className="break-word">{pro.description}</Table.Cell>
-                                        <Table.Cell>{pro.is_active ? "True" : "False"}</Table.Cell>
+                                        <Table.Cell>{pro.is_active ? "Hiển thi" : "Không hiển thị"}</Table.Cell>
                                         <Table.Cell>{pro.discount_value}</Table.Cell>
                                         <Table.Cell>{new Date(pro.start_at).toISOString().slice(0, 16)}</Table.Cell>
                                         <Table.Cell>{new Date(pro.end_at).toISOString().slice(0, 16)}</Table.Cell>
                                         <Table.Cell>
-                                            <Button primary onClick={() => handleUpdate(pro.id)}>
-                                                Update
-                                            </Button>
-                                            <Button color="red" onClick={() => handleDelete(pro.id)}>Delete</Button>
+                                        <Popup
+                                            trigger={<Button color='orange' onClick={() => handleActionClick(pro.id)}> <IoSettingsOutline /> Action</Button>}
+                                            content={
+                                                <div>
+                                                  <Button primary onClick={() => handleUpdate(pro.id)}>Update</Button>
+                                                  <Button color='red' onClick={() => handleDelete(pro.id)}>Delete</Button>
+                                                </div>
+                                              }
+                                              on='click'
+                                              open={popupProductId === pro.id && openPopup}
+                                              onClose={() => setOpenPopup(false)}
+                                              position='bottom left'
+                                        />
                                         </Table.Cell>
                                     </Table.Row>
                                 );
@@ -258,11 +277,11 @@ function Promotion() {
             {showUpdateForm && selectedPromotion && (
                 <div ref={updateFormRef} className="update-form-container">
                     <center>
-                        <h2 className="text-center">Update Promotion</h2>
+                        <h2 className="text-center">Cập nhật khuyến mãi</h2>
                     </center>
                     <Form style={{ width: '400px' }}>
                         <Form.Field>
-                            <label>Name</label>
+                            <label>Tên khuyễn mãi</label>
                             <Input
                                 type="text"
                                 value={selectedPromotion.name}
@@ -275,7 +294,7 @@ function Promotion() {
                             />
                         </Form.Field>
                         <Form.Field>
-                            <label>Description</label>
+                            <label>Mô tả</label>
                             <Input
                                 type="text"
                                 value={selectedPromotion.description}
@@ -288,7 +307,7 @@ function Promotion() {
                             />
                         </Form.Field>
                         <Form.Field>
-                            <label>Is_active</label>
+                            <label>Trạng thái</label>
                             <Form.Select
                             options={[
                                 { key: 1, value: true, text: 'True' },
@@ -304,7 +323,7 @@ function Promotion() {
                             />
                         </Form.Field>
                         <Form.Field>
-                            <label>Discount value</label>
+                            <label>Giảm giá</label>
                             <Input
                                 type="number"
                                 value={selectedPromotion.discount_value}
@@ -317,7 +336,7 @@ function Promotion() {
                             /> 
                         </Form.Field>
                         <Form.Field>
-                            <label>Start at</label>
+                            <label>Ngày bắt đầu</label>
                             <input
                                 type="datetime-local"
                                 value={selectedPromotion.start_at ? new Date(selectedPromotion.start_at).toISOString().slice(0, 16) : ''}
@@ -330,7 +349,7 @@ function Promotion() {
                             />
                         </Form.Field>
                         <Form.Field>
-                            <label>End at</label>
+                            <label>Ngày kết thúc</label>
                             <input
                                 type="datetime-local"
                                 value={selectedPromotion.end_at ? new Date(selectedPromotion.end_at).toISOString().slice(0, 16) : ''}
@@ -344,10 +363,10 @@ function Promotion() {
                         </Form.Field>
                         <Form.Field style={{ display: 'flex', justifyContent: 'space-between' }}>
                             <Button primary type="button" onClick={handleUpdateFormSubmit}>
-                                Save
+                                Cập nhật
                             </Button>
                             <Button color='red' onClick={() => setShowUpdateForm(false)}>
-                                Cancel
+                                Hủy bỏ
                             </Button>
                         </Form.Field>
                     </Form>
@@ -357,11 +376,11 @@ function Promotion() {
             {showAddForm && (
             <div ref={addFormRef} className="add-form-container">
                 <center>
-                <h2 className="text-center">Add Promotion</h2>
+                <h2 className="text-center">Thêm khuyến mãi</h2>
                 </center>
                 <Form onSubmit={handleAddFormSubmit} style={{ width: '400px' }}>
                 <Form.Field>
-                    <label>Name</label>
+                    <label>Tên khuyến mãi</label>
                     <Input
                     type="text"
                     value={newPromotion.name}
@@ -374,7 +393,7 @@ function Promotion() {
                     />
                 </Form.Field>
                 <Form.Field>
-                    <label>Description</label>
+                    <label>Mô tả</label>
                     <Input
                     type="text"
                     value={newPromotion.description}
@@ -387,7 +406,7 @@ function Promotion() {
                     />
                 </Form.Field>
                 <Form.Field>
-                    <label>Is_active</label>
+                    <label>Trạng thái</label>
                     <Form.Select
                     options={[
                         { key: 1, value: true, text: 'True' },
@@ -403,7 +422,7 @@ function Promotion() {
                     /> 
                 </Form.Field>
                 <Form.Field>
-                    <label>Discount value</label>
+                    <label>Giảm giá</label>
                     <Input
                         type="number"
                         value={newPromotion.discount_value}
@@ -413,10 +432,11 @@ function Promotion() {
                                 discount_value: e.target.value,
                             })
                         }
-                    /> required
+                        required
+                    /> 
                 </Form.Field>
                 <Form.Field>
-                    <label>Start at</label>
+                    <label>Ngày bắt đầu</label>
                     <input
                         type="datetime-local"
                         value={newPromotion.start_at ? new Date(newPromotion.start_at).toISOString().slice(0, 16) : ''}
@@ -429,7 +449,7 @@ function Promotion() {
                     />
                 </Form.Field>
                 <Form.Field>
-                    <label>End at</label>
+                    <label>Ngày kết thúc</label>
                     <input
                         type="datetime-local"
                         value={newPromotion.end_at ? new Date(newPromotion.end_at).toISOString().slice(0, 16) : ''}
@@ -444,10 +464,10 @@ function Promotion() {
 
                 <Form.Field style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Button primary type="submit">
-                    Add
+                    Thêm
                     </Button>
                     <Button color='red' onClick={() => setShowAddForm(false)}>
-                    Cancel
+                    Hủy bỏ
                     </Button>
                 </Form.Field>
                 </Form>

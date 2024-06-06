@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Table, Button, Form, Input } from 'semantic-ui-react'
+import { Table, Button, Form, Input, Popup } from 'semantic-ui-react'
 import { getSize, addSize, updateSize, deleteSize } from '../api/service';
 import { toast } from "react-toastify"
 import { ToastContainer } from "react-toastify"
 import "../assets/category.css"
+import { IoSettingsOutline } from "react-icons/io5"
+import { MdDelete } from "react-icons/md";
 
-function Category() {
+function Size() {
     const [categories, setCategories] = useState([])
     const [showUpdateForm, setShowUpdateForm] = useState(false)
     const [showAddForm, setShowAddForm] = useState(false)
@@ -14,8 +16,16 @@ function Category() {
         name: "",
         description: "",
     });
-    const updateFormRef = useRef(null);
-    const addFormRef = useRef(null);
+    const updateFormRef = useRef(null)
+    const addFormRef = useRef(null)
+
+    const [openPopup, setOpenPopup] = useState(false)
+    const [popupProductId, setPopupProductId] = useState(null)
+    
+    const handleActionClick = (id) => {
+        setPopupProductId(id)
+        setOpenPopup(!openPopup)
+      }
 
     const fetchSize = async () => {
         try {
@@ -33,10 +43,10 @@ function Category() {
             await addSize(newCategory)
             fetchSize()
             setShowAddForm(false)
-            localStorage.setItem('sizes', JSON.stringify(categories));
-            toast.success("add item successfully!")
+            localStorage.setItem('sizes', JSON.stringify(categories))
+            toast.success("Thêm thành công!")
         } catch(error) {
-            console.error('Error updating promotion:', error);
+            console.error('Error updating promotion:', error)
             toast.success(error)
         }  
     }
@@ -46,8 +56,9 @@ function Category() {
             const selected = categories.find((item) => item.id === id)
             setSelectedCategory(selected)
             setShowUpdateForm(true)
+            setOpenPopup(false)
         } catch (e) {
-            console.error('Error :', error);
+            console.error('Error :', error)
             toast.success(error)
         }
     }
@@ -64,10 +75,10 @@ function Category() {
             setSelectedCategory(null);
 
             fetchSize()
-            localStorage.setItem('sizes', JSON.stringify(categories));
-            toast.success("update successfully!")
+            localStorage.setItem('sizes', JSON.stringify(categories))
+            toast.success("Cập nhật thành công!")
         } catch (e) {
-            console.error('Error updating category:', error);
+            console.error('Error updating category:', error)
             toast.success(error)            
         }
     }
@@ -76,8 +87,9 @@ function Category() {
         try {
             await deleteSize(id)
             fetchSize()
-            localStorage.setItem('sizes', JSON.stringify(categories));
-            toast.success("delete successfully!")
+            localStorage.setItem('sizes', JSON.stringify(categories))
+            toast.success("Xóa thành công!")
+            setOpenPopup(false)
         } catch (error) {
             console.log("error: ", error)
             toast.success(error)
@@ -94,9 +106,9 @@ function Category() {
             }
         }
     
-        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('mousedown', handleClickOutside)
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('mousedown', handleClickOutside)
         };
     }, [])
     
@@ -117,7 +129,7 @@ function Category() {
         <div className='main-container'>
             <div className={`main-container ${showUpdateForm || showAddForm ? 'blur-background' : ''}`}>
                 <center>
-                    <h2 className="text-center">Category List</h2>
+                    <h2 className="text-center">Quản li size</h2>
                 </center>
                 <div className="row">
                     <Button primary onClick={() => setShowAddForm(true)}>Add Size</Button>
@@ -128,9 +140,9 @@ function Category() {
                         <Table.Header>
                             <Table.Row>
                                 <Table.HeaderCell>Id</Table.HeaderCell>
-                                <Table.HeaderCell>Name</Table.HeaderCell>
-                                <Table.HeaderCell>Description</Table.HeaderCell>
-                                <Table.HeaderCell>Action</Table.HeaderCell>
+                                <Table.HeaderCell>Tên</Table.HeaderCell>
+                                <Table.HeaderCell>Mô tả</Table.HeaderCell>
+                                <Table.HeaderCell>Hành động</Table.HeaderCell>
 
                             </Table.Row>
                         </Table.Header>
@@ -142,11 +154,20 @@ function Category() {
                                     <Table.Cell>{category.name}</Table.Cell>
                                     <Table.Cell>{category.description}</Table.Cell>
                                     <Table.Cell>
-                                            <Button primary onClick={() => handleUpdate(category.id)}>
-                                                Update
-                                            </Button>
-                                            <Button color="red" onClick={() => handleDelete(category.id)}>Delete</Button>
-                                        </Table.Cell>
+                                    <Popup
+                                        trigger={<Button color='orange' onClick={() => handleActionClick(category.id)}> <IoSettingsOutline /> Hành động</Button>}
+                                        content={
+                                            <div>
+                                                <Button primary onClick={() => handleUpdate(category.id)}>Cập nhật</Button>
+                                                <Button color='red' onClick={() => handleDelete(category.id)}>Xóa</Button>
+                                            </div>
+                                            }
+                                            on='click'
+                                            open={popupProductId === category.id && openPopup}
+                                            onClose={() => setOpenPopup(false)}
+                                            position='bottom left'
+                                    />
+                                    </Table.Cell>
                                 </Table.Row>
                             ))}
                         </Table.Body>
@@ -157,11 +178,11 @@ function Category() {
             {showUpdateForm && selectedCategory && (
                 <div ref={updateFormRef} className="update-form-container">
                     <center>
-                        <h2 className="text-center">Update Size</h2>
+                        <h2 className="text-center">Cập nhật size</h2>
                     </center>
                     <Form onSubmit={() => handleUpdateSubmit()} style={{ width: '400px' }}>
                         <Form.Field>
-                            <label>Name</label>
+                            <label>Tên</label>
                             <Input
                                 type="text"
                                 value={selectedCategory.name}
@@ -174,7 +195,7 @@ function Category() {
                             />
                         </Form.Field>
                         <Form.Field>
-                            <label>Description</label>
+                            <label>Mô tả</label>
                             <Input
                                 type="text"
                                 value={selectedCategory.description}
@@ -188,10 +209,10 @@ function Category() {
                         </Form.Field>
                         <Form.Field style={{ display: 'flex', justifyContent: 'space-between' }}>
                             <Button primary type="submit" >
-                                Save
+                                Cập nhật
                             </Button>
                             <Button color='red' onClick={() => setShowUpdateForm(false)}>
-                                Cancel
+                                Hủy bỏ
                             </Button>
                         </Form.Field>
                     </Form>
@@ -201,11 +222,11 @@ function Category() {
             {showAddForm && (
             <div ref={addFormRef} className="add-form-container">
                 <center>
-                <h2 className="text-center">Add Size</h2>
+                <h2 className="text-center">Thêm Size</h2>
                 </center>
                 <Form onSubmit={handleAddFormSubmit} style={{ width: '400px' }}>
                 <Form.Field>
-                    <label>Name</label>
+                    <label>Tên</label>
                     <Input
                     type="text"
                     value={newCategory.name}
@@ -218,7 +239,7 @@ function Category() {
                     />
                 </Form.Field>
                 <Form.Field>
-                    <label>Description</label>
+                    <label>Mô tả</label>
                     <Input
                     type="text"
                     value={newCategory.description}
@@ -233,10 +254,10 @@ function Category() {
 
                 <Form.Field style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Button primary type="submit">
-                    Add
+                        Thêm 
                     </Button>
                     <Button color='red' onClick={() => setShowAddForm(false)}>
-                    Cancel
+                        Hủy bỏ
                     </Button>
                 </Form.Field>
                 </Form>
@@ -247,4 +268,4 @@ function Category() {
     )
 }
 
-export default Category
+export default Size

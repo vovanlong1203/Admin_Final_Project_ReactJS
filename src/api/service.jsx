@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const URL = "https://deploy-api-s8u1.onrender.com"
-export const url_web = "https://deploy-api-s8u1.onrender.com"
+const URL = "http://192.168.2.201:5000"
+export const url_web = "http://192.168.2.201:5000"
 
 // const token = localStorage.getItem('accessToken')
 /* api login */
@@ -36,6 +36,52 @@ export const get_all_user = async () => {
     throw error;
   }
 };
+
+export const searchUserAdmin = async (keyword, page, limit) => {
+  try {
+    const token = localStorage.getItem('accessToken')
+    const response = await axios.get(`${URL}/api/admin/users?keyword=${keyword}&page=${page}&limit=${limit}`, {
+      headers: {
+        'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
+    }
+    })
+    return response.data
+  } catch (error) {
+    console.error(error)
+    console.log("error: ", error)
+    throw error
+  }
+}
+
+export const lockUser = async(id) => {
+  try {
+    const token = localStorage.getItem('accessToken')
+    const response = await axios.put(`${URL}/api/admin/users/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
+    }
+    })
+    return response
+  } catch (error) {
+    console.error(error);
+    console.log("error: ", error)
+    throw error;
+  }
+}
+
+export const getCountUser = async () => {
+  const token = localStorage.getItem('accessToken');
+  try {
+    const response = await axios.get(`${URL}/api/admin/users/count`, {
+      headers: {
+        'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
+    }
+    })
+    return response.data
+  } catch (error) {
+    console.log("error: ", error)
+  }
+}
 
 /*end api user */
 
@@ -137,6 +183,22 @@ export const getCategory = async () => {
     console.log("error: ", error)
   }
 };
+
+
+export const getCountCategory = async () => {
+  const token = localStorage.getItem('accessToken');
+  try {
+    const response = await axios.get(`${URL}/api/admin/category/count`, {
+      headers: {
+        'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
+    }
+    })
+    return response.data
+  } catch (error) {
+    console.log("error: ", error)
+  }
+}
+
 
 export const addCategory = async (data) => {
   try {
@@ -249,10 +311,56 @@ export const deleteSize = async (id) => {
 /* End api size */
 
 /*  api product */
-export const getProducts = async () => {
+
+export const getProduct = async () => {
   const token = localStorage.getItem('accessToken');
   try {
     const response = await axios.get(`${URL}/api/admin/product`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.log("error: ", error);
+    throw error; 
+  }
+};
+
+// export const getProducts = async (page, limit) => {
+//   const token = localStorage.getItem('accessToken');
+//   try {
+//     const response = await axios.get(`${URL}/api/admin/products?page=${page}&limit=${limit}`, {
+//       headers: {
+//         'Authorization': `Bearer ${token}`
+//       }
+//     });
+//     return response.data;
+//   } catch (error) {
+//     console.log("error: ", error);
+//     throw error; 
+//   }
+// };
+
+export const searchProducts = async (keyword, page, limit) => {
+  const token = localStorage.getItem('accessToken');
+  try {
+    const response = await axios.get(`${URL}/api/admin/search_products_admin?keyword=${keyword}&page=${page}&limit=${limit}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.log("error: ", error);
+    throw error; 
+  }
+};
+
+export const getCountProduct = async () => {
+  const token = localStorage.getItem('accessToken');
+  try {
+    const response = await axios.get(`${URL}/api/admin/product/count`, {
       headers: {
         'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
     }
@@ -304,6 +412,8 @@ export const deleteProduct = async (id) => {
     console.log("error: ", error)
   }
 }
+
+
 /* End api product */
 
 /*  api product size */
@@ -334,6 +444,21 @@ export const addProductSize = async (data) => {
     console.log("error: ", error)
   }
 }
+
+export const searchProductSize = async (keyword, page, limit) => {
+  const token = localStorage.getItem('accessToken');
+  try {
+    const response = await axios.get(`${URL}/api/product_size/admin/search-product-size-admin?keyword=${keyword}&page=${page}&limit=${limit}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.log("error: ", error);
+    throw error; 
+  }
+};
 
 /* End api product size */
 
@@ -382,6 +507,21 @@ export const deleteProductImage = async (id) => {
     console.log(error);
   }
 }
+
+export const searchProductImage = async (keyword, page, limit) => {
+  const token = localStorage.getItem('accessToken');
+  try {
+    const response = await axios.get(`${URL}/api/admin/search-image-admin?keyword=${keyword}&page=${page}&limit=${limit}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.log("error: ", error);
+    throw error; 
+  }
+};
 
 /* End api product image */
 
@@ -439,6 +579,65 @@ export const getOrder = async () => {
   try {
     const token = localStorage.getItem('accessToken');
     const response = await axios.get(`${URL}/api/admin/orders`, {
+      headers: {
+        'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
+    }
+    })
+    return response.data
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export const searchOrder = async (keyword, page, limit) => {
+  const token = localStorage.getItem('accessToken');
+  try {
+    const response = await axios.get(`${URL}/api/admin/search_orders_admin?keyword=${keyword}&page=${page}&limit=${limit}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.log("error: ", error);
+    throw error; 
+  }
+};
+
+export const getOrderByMonthYear = async (month, year) => {
+  const token = localStorage.getItem('accessToken');
+  try {
+    const response = await axios.get(`${URL}/api/admin/get-order-month-year?month=${month}&year=${year}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.log("error: ", error);
+    throw error; 
+  }
+}
+
+export const getOrderStatusByMonthYear = async (month, year) => {
+  const token = localStorage.getItem('accessToken');
+  try {
+    const response = await axios.get(`${URL}/api/admin/get-status-month-year?month=${month}&year=${year}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.log("error: ", error);
+    throw error; 
+  }
+};
+
+export const getCountOrder = async () => {
+  try {
+    const token = localStorage.getItem('accessToken');
+    const response = await axios.get(`${URL}/api/admin/orders/count`, {
       headers: {
         'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
     }
@@ -510,6 +709,21 @@ export const getYearOrder = async () => {
   } catch (error) {
     console.log("error: ", error)
     throw error;
+  }
+}
+
+export const getOrderItemDetail = async (id) => {
+  try {
+      const token = localStorage.getItem('accessToken')
+      const response = await axios.get(`${URL}/api/admin/order-items/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
+      }
+      })
+      return response.data
+  } catch (error) {
+      console.log("error: ", error)
+      throw error;
   }
 }
 

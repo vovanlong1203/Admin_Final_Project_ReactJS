@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Table, Button, Form, Input, Tab } from 'semantic-ui-react'
-import { getProductSize, getProducts, getSize, addProductSize } from '../api/service'
+import { getProductSize, getProduct, getSize, addProductSize, searchProductSize } from '../api/service'
 import "../assets/category.css"
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
@@ -21,55 +21,22 @@ function ProductSize() {
   const updateFormRef = useRef(null)
   const addFormRef = useRef(null)
 
-  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-  const [itemsPerPage, setItemsPerPage] = useState(10); // Số mục trên mỗi trang
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(20)
+  const [totalPages, setTotalPages] = useState(0)
 
   const indexOfLastItem = currentPage * itemsPerPage
   const indexOfFirstItem = indexOfLastItem - itemsPerPage
 
   const currentProductSize = filteredProductSize.slice(indexOfFirstItem, indexOfLastItem)
-  const totalPages = Math.ceil(filteredProductSize.length / itemsPerPage)
 
-  const goToPreviousPage = () => {
-    setCurrentPage(prevPage => Math.max(prevPage - 1, 1));
-    };
-
-    const goToNextPage = () => {
-        setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages));
-    };
-
-    const goToPage = (pageNumber) => {
-        setCurrentPage(pageNumber);
-    };
-
-    const renderPaginationButtons = () => {
-        const pageNumbers = [];
-        for (let i = 1; i <= totalPages; i++) {
-            pageNumbers.push(i);
-        }
-        return (
-            <div>
-                <Button color='grey' onClick={goToPreviousPage} disabled={currentPage === 1}>Previous</Button>
-                {pageNumbers.map(number => (
-                    <Button
-                        key={number}
-                        onClick={() => goToPage(number)}
-                        disabled={currentPage === number}
-                    >
-                        {number}
-                    </Button>
-                ))}
-                <Button color='purple' onClick={goToNextPage} disabled={currentPage === totalPages}>Next</Button>
-
-            </div>
-        );
-    };
-
-  const fetchProductSize = async () => {
+  const fetchProductSize = async (page = currentPage, limit = itemsPerPage, keyword = searchKeyword) => {
     try {
-        const productSizeData = await getProductSize()
-        setProductSize(productSizeData)
-        setFilteredProductSize(productSizeData)
+        const productSizeData = await searchProductSize(keyword, page, limit)
+        setProductSize(productSizeData.items)
+        setFilteredProductSize(productSizeData.items)
+        setTotalPages(productSizeData.totalPages)
+        localStorage.setItem("productSize", JSON.stringify(productSizeData.items));
       } catch (error) {
         console.log(error)
       }
@@ -77,7 +44,7 @@ function ProductSize() {
 
   const fetchProduct = async () => {
     try {
-      const productData = await getProducts()
+      const productData = await getProduct()
       setProduct(productData)
     } catch (error) {
       console.log(error)
@@ -99,34 +66,74 @@ function ProductSize() {
         fetchProductSize()
         setShowAddForm(false)
         localStorage.setItem('product_size', JSON.stringify(product));
-        toast.success("add item successfully!")
+        toast.success("Thêm thành công!")
     } catch (error) {
         console.log(error)
     }
   }
  
   useEffect( () => {
-    fetchProductSize()
+    fetchProductSize(currentPage,itemsPerPage,searchKeyword)
     fetchProduct()
     getSizes()
-  }, [])
+  }, [currentPage])
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     const keyword = searchKeyword.toLowerCase()
 
-    const filtered = productSize.filter((pro) =>
-        pro.product.toLowerCase().includes(keyword)    
-    )
-
-    setFilteredProductSize(filtered)
+    const filtered = await searchProductSize(keyword, currentPage, itemsPerPage);
+    setFilteredProductSize(filtered.items)
+    setTotalPages(filtered.totalPages)
   }
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+        const newPage = currentPage - 1
+        setCurrentPage(newPage)
+        fetchProductSize(newPage, itemsPerPage, searchKeyword)
+    }
+}
+
+const goToNextPage = () => {
+if (currentPage < totalPages) {
+  const newPage = currentPage + 1
+  setCurrentPage(newPage)
+  fetchProductSize(newPage, itemsPerPage, searchKeyword)
+}
+}
+
+const goToPage = (pageNumber) => {
+setCurrentPage(pageNumber)
+fetchProductSize(pageNumber, itemsPerPage, searchKeyword)
+}
+
+const renderPaginationButtons = () => {
+const pageNumbers = []
+for (let i = 1; i <= totalPages; i++) {
+  pageNumbers.push(i)
+}
+return (
+  <div>
+    <Button color='grey' onClick={goToPreviousPage} disabled={currentPage === 1}>Previous</Button>
+    {pageNumbers.map(number => (
+      <Button
+        key={number}
+        onClick={() => goToPage(number)}
+        disabled={currentPage === number}
+      >
+        {number}
+      </Button>
+    ))}
+    <Button color='purple' onClick={goToNextPage} disabled={currentPage === totalPages}>Next</Button>
+  </div>
+)
+}
   
 
   return (
     <div className='main-container'>
         <div className={`main-container ${showUpdateForm || showAddForm ? 'blur-background' : ''}`}>
             <center>
-                <h2>Product Size List</h2>  
+                <h2>Quản lí số lượng sản phẩm</h2>  
             </center>
             <div style={{ display: 'flex' ,justifyContent : 'space-between'}}>
                 <div className="row" style={{marginBottom: '20px'}}>
@@ -139,10 +146,10 @@ function ProductSize() {
                     />
                     <Button primary type='button' 
                     onClick={handleSearch}
-                    >Search</Button>
+                    >Tìm kiếm</Button>
                 </div>
                 <div className="row">
-                    <Button primary onClick={() => setShowAddForm(true)}>Add Product</Button>
+                    <Button primary onClick={() => setShowAddForm(true)}>Thêm size sản phẩm</Button>
                 </div>
             </div>
             <br />
@@ -151,9 +158,9 @@ function ProductSize() {
                     <Table.Header>
                         <Table.Row>
                             <Table.HeaderCell>Id</Table.HeaderCell>
-                            <Table.HeaderCell>Product</Table.HeaderCell>
-                            <Table.HeaderCell>Quantity</Table.HeaderCell>
-                            <Table.HeaderCell>Quantity sold</Table.HeaderCell>
+                            <Table.HeaderCell>Sản Phẩm</Table.HeaderCell>
+                            <Table.HeaderCell>Số lượng </Table.HeaderCell>
+                            <Table.HeaderCell>Số lượng bán </Table.HeaderCell>
                             <Table.HeaderCell>Size</Table.HeaderCell>
                         </Table.Row>
                     </Table.Header>
@@ -182,11 +189,11 @@ function ProductSize() {
         {showAddForm && (
             <div ref={addFormRef} className="add-form-container">
                 <center>
-                <h2 className="text-center">Add Product size</h2>
+                <h2 className="text-center">Thêm size sản phẩm</h2>
                 </center>
                 <Form onSubmit={handleFormAdd} style={{ width: '400px' }}>
                 <Form.Field>
-                    <label>Product</label>
+                    <label>Sản phẩm</label>
                     <Form.Select
                         options={product.map(item => ({
                             key: item.id,
@@ -206,7 +213,7 @@ function ProductSize() {
                     </Form.Select>
                 </Form.Field>
                 <Form.Field>
-                    <label>Quantity</label>
+                    <label>Số lượng</label>
                     <Input
                         type="number"
                         value={newProductSize.quantity}
@@ -237,10 +244,10 @@ function ProductSize() {
                 </Form.Field>                
                 <Form.Field style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Button primary type="button" onClick={handleFormAdd}>
-                        Add
+                        Thêm 
                     </Button>
                     <Button color='red'onClick={() => setShowAddForm(false)}>
-                        Cancel
+                        Hủy bỏ
                     </Button>
                 </Form.Field>
                 </Form>

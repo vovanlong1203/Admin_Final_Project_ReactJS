@@ -7,6 +7,7 @@ import {BsCart3, BsGrid1X2Fill, BsFillArchiveFill, BsFillGrid3X3GapFill, BsPeopl
  import { LuFileInput } from "react-icons/lu"
  import { FaImage } from "react-icons/fa"
  import { Link, NavLink } from 'react-router-dom'
+ import { FaUser } from "react-icons/fa"
 
 
 function Sidebar({openSidebarToggle, OpenSideBar}) {
@@ -22,22 +23,27 @@ function Sidebar({openSidebarToggle, OpenSideBar}) {
         <ul className='sidebar-list'>
             <Link to="/home">
                 <li className='sidebar-list-item'>
-                        <BsGrid1X2Fill className='icon' /> Dashboard
+                        <BsGrid1X2Fill className='icon' /> Tổng quan
+                </li>
+            </Link>
+            <Link to="/user">
+                <li className='sidebar-list-item'>
+                        <FaUser  className='icon'/> Khách hàng
                 </li>
             </Link>
             <Link to="/product">
                 <li className='sidebar-list-item'>
-                        <BsFillArchiveFill className='icon'/> Products
+                        <BsFillArchiveFill className='icon'/> Sản phẩm
                 </li>
             </Link>
             <Link to="/promotion">
                 <li className='sidebar-list-item'>
-                        <MdOutlineConfirmationNumber className='icon'/> Promotion
+                        <MdOutlineConfirmationNumber className='icon'/> Khuyến mãi
                 </li>
             </Link>
             <Link to="/category">
                 <li className='sidebar-list-item'>
-                        <BiCategory className='icon'/> Categories
+                        <BiCategory className='icon'/> Danh mục
                 </li>
             </Link>
             <Link to="/size">
@@ -47,12 +53,12 @@ function Sidebar({openSidebarToggle, OpenSideBar}) {
             </Link>
             <Link to="/quantityProduct">
                 <li className='sidebar-list-item'>
-                        <BsListCheck className='icon'/> Quantity Product
+                        <BsListCheck className='icon'/> Số lượng sản phẩm
                 </li>
             </Link>
             <Link to="/productImage">
                 <li className='sidebar-list-item'>
-                        <FaImage className='icon'/> Product Image
+                        <FaImage className='icon'/> Ảnh sản phẩm
                 </li>
             </Link>
             <Link to="/voucher">
@@ -62,14 +68,14 @@ function Sidebar({openSidebarToggle, OpenSideBar}) {
             </Link>
             <Link to="/order">
                 <li className='sidebar-list-item'>
-                        <BsMenuButtonWideFill className='icon'/> Order
+                        <BsMenuButtonWideFill className='icon'/> Đơn hàng
                 </li>
             </Link>
-            {/* <Link href="">
+            <Link to="/statistic">
                 <li className='sidebar-list-item'>
-                        <BsFillGearFill className='icon'/> Setting
+                        <BsFillGearFill className='icon'/> Thống kê
                 </li>
-            </Link> */}
+            </Link>
         </ul>
 
     </aside>

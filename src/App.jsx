@@ -20,6 +20,8 @@ import ProductImage from './pages/ProductImage'
 import Voucher from './pages/Voucher'
 import Order from './pages/Order'
 import 'chart.js/auto'
+import Statistics from './pages/Statistics'
+import User from './pages/User'
 
 function App() {
 
@@ -52,19 +54,19 @@ function App() {
         localStorage.setItem('accessToken', response.access_token);
         setIsLoggedIn(true);
         navigate('/home');
-        toast.success("Login successfully!");
+        toast.success("Đăng nhập thành công!");
       } else {
         throw new Error("Access token not found in response");
       }
     } catch (error) {
       console.error('Error during login:', error);
-      toast.error("Login failed!");
+      toast.error("Đăng nhập thất bại!");
     }
   };
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
     setIsLoggedIn(false);
-    toast.success("logout successfully!")
+    toast.success("Đăng xuất thành công!")
   };
 
   useEffect(() => {
@@ -102,6 +104,8 @@ function App() {
                 <Route path="/productImage" element={<ProductImage />} />
                 <Route path="/voucher" element={<Voucher />} />
                 <Route path="/order" element={<Order />} />
+                <Route path="/statistic" element={<Statistics />} />
+                <Route path="/user" element={<User />} />
               </Routes>
             </div>
           </>
