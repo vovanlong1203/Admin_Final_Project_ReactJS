@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const URL = "https://final-project-datn.onrender.com"
-export const url_web = "https://final-project-datn.onrender.com"
+const URL = "http://192.168.1.20:5000"
+export const url_web = "http://192.168.1.20:5000"
 
 // const token = localStorage.getItem('accessToken')
 /* api login */
@@ -53,12 +53,12 @@ export const searchUserAdmin = async (keyword, page, limit) => {
   }
 }
 
-export const lockUser = async(id) => {
+export const lockUser = async (id) => {
   try {
     const token = localStorage.getItem('accessToken')
-    const response = await axios.put(`${URL}/api/admin/users/${id}`, {
+    const response = await axios.put(`${URL}/api/admin/users/${id}`, null , {
       headers: {
-        'Authorization': `Bearer ${token}` // Add JWT token to Authorization header
+        'Authorization': `Bearer ${token}` 
     }
     })
     return response

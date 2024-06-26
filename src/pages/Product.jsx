@@ -237,7 +237,7 @@ function Product() {
     <div className='main-container'>
       <div className={`main-container ${showUpdateForm || showAddForm ? 'blur-background' : ''}`}>
         <center>
-          <h2>Quản lí sản phẩm</h2>  
+          <h2>Quản lý sản phẩm</h2>  
         </center>
         <div style={{ display: 'flex' ,justifyContent : 'space-between'}}>
           <div style={{marginBottom: '20px'}}>
@@ -262,17 +262,17 @@ function Product() {
         <div>
         <Table singleLine>
           <Table.Header>
-              <Table.Row>
-                  <Table.HeaderCell>ID</Table.HeaderCell>
-                  <Table.HeaderCell>Tên SP</Table.HeaderCell>
-                  <Table.HeaderCell>Mô Tả</Table.HeaderCell>
-                  <Table.HeaderCell>Trạng Thái</Table.HeaderCell>
-                  <Table.HeaderCell>Giá</Table.HeaderCell>
-                  <Table.HeaderCell>Loại</Table.HeaderCell>
-                  <Table.HeaderCell>Khuyến mãi</Table.HeaderCell>
-                  <Table.HeaderCell>Hành động</Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
+            <Table.Row>
+                <Table.HeaderCell>ID</Table.HeaderCell>
+                <Table.HeaderCell>Tên SP</Table.HeaderCell>
+                <Table.HeaderCell>Mô Tả</Table.HeaderCell>
+                <Table.HeaderCell>Trạng Thái</Table.HeaderCell>
+                <Table.HeaderCell>Giá</Table.HeaderCell>
+                <Table.HeaderCell>Loại</Table.HeaderCell>
+                <Table.HeaderCell>Khuyến mãi</Table.HeaderCell>
+                <Table.HeaderCell>Hành động</Table.HeaderCell>
+            </Table.Row>
+          </Table.Header>
 
             <Table.Body>
               {

@@ -135,7 +135,7 @@ function Voucher() {
     <div className='main-container'>
         <div className={`main-container ${showUpdateForm || showAddForm ? 'blur-background' : ''}`}>
             <center>
-                <h2 className="text-center">Quản lí voucher</h2>
+                <h2 className="text-center">Quản lý voucher</h2>
             </center>  
             <div style={{ display: 'flex' ,justifyContent : 'space-between'}}>
                 <div className="row" style={{marginBottom: '20px'}}>
@@ -161,14 +161,14 @@ function Voucher() {
                         <Table.HeaderCell >ID</Table.HeaderCell>
                         <Table.HeaderCell className="break-word">Số tiền mua tối thiểu</Table.HeaderCell>
                         <Table.HeaderCell >Số lượng sử dụng</Table.HeaderCell>
-                        <Table.HeaderCell >giới hạn sử dụng</Table.HeaderCell>
-                        <Table.HeaderCell className="break-word">giá trị giảm giá</Table.HeaderCell>
+                        <Table.HeaderCell >Giới hạn sử dụng</Table.HeaderCell>
+                        <Table.HeaderCell className="break-word">Giá trị giảm giá</Table.HeaderCell>
                         <Table.HeaderCell className="break-word">Ngày bắt đầu</Table.HeaderCell>
                         <Table.HeaderCell className="break-word">Ngày kết thúc</Table.HeaderCell>
-                        <Table.HeaderCell className="break-word">code</Table.HeaderCell>
+                        <Table.HeaderCell className="break-word">Code</Table.HeaderCell>
                         <Table.HeaderCell>Thể loại giảm</Table.HeaderCell>
                         <Table.HeaderCell>Thể loại voucher</Table.HeaderCell>
-                        <Table.HeaderCell>maxDiscountValue</Table.HeaderCell>
+                        <Table.HeaderCell>MaxDiscountValue</Table.HeaderCell>
                         <Table.HeaderCell>Trạng thái</Table.HeaderCell>
                         <Table.HeaderCell>Xóa</Table.HeaderCell>
                     </Table.Row>

@@ -52,7 +52,7 @@ function Order() {
             setOpenPopup(false)
         } catch (error) {
             console.log(error)
-            setSelectedOrder([]);
+            setSelectedOrder([])
         }
     }
 
@@ -173,7 +173,7 @@ function Order() {
     <div className='main-container'>
         <div className={`main-container ${showUpdateForm || showAddForm ? 'blur-background' : ''}`}>
             <center>
-                <h2 className="text-center">Quản lí đơn hàng</h2>
+                <h2 className="text-center">Quản lý đơn hàng</h2>
             </center>
             <br />
 

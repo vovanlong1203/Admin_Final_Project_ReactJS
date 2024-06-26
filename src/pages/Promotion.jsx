@@ -201,7 +201,7 @@ function Promotion() {
         <div className='main-container'>
             <div className={`main-container ${showUpdateForm || showAddForm ? 'blur-background' : ''}`}>
                 <center>
-                    <h2 className="text-center">Quản lí khuyến mãi</h2>
+                    <h2 className="text-center">Quản lý khuyến mãi</h2>
                 </center>
                 <br />
                 <div style={{ display: 'flex' ,justifyContent : 'space-between'}}>
@@ -254,8 +254,8 @@ function Promotion() {
                                             trigger={<Button color='orange' onClick={() => handleActionClick(pro.id)}> <IoSettingsOutline /> Action</Button>}
                                             content={
                                                 <div>
-                                                  <Button primary onClick={() => handleUpdate(pro.id)}>Update</Button>
-                                                  <Button color='red' onClick={() => handleDelete(pro.id)}>Delete</Button>
+                                                  <Button primary onClick={() => handleUpdate(pro.id)}>Cập nhật </Button>
+                                                  <Button color='red' onClick={() => handleDelete(pro.id)}>Xóa</Button>
                                                 </div>
                                               }
                                               on='click'

@@ -128,7 +128,7 @@ function Category() {
         <div className='main-container'>
             <div className={`main-container ${showUpdateForm || showAddForm ? 'blur-background' : ''}`}>
                 <center>
-                    <h2 className="text-center">Quản lí danh mục</h2>
+                    <h2 className="text-center">Quản lý danh mục</h2>
                 </center>
                 <div className="row">
                     <Button primary onClick={() => setShowAddForm(true)}>Thêm danh mục</Button>

@@ -170,7 +170,7 @@ function ProductImage() {
         <div className='main-container'>
             <div className={`main-container ${showUpdateForm || showAddForm ? 'blur-background' : ''}`}>
                 <center>
-                    <h2>Quản lí ảnh sản phẩm</h2>  
+                    <h2>Quản lý ảnh sản phẩm</h2>  
                 </center>  
                 <div style={{ display: 'flex' ,justifyContent : 'space-between'}}>
                     <div className="row" style={{marginBottom: '20px'}}>

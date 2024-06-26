@@ -28,8 +28,6 @@ function ProductSize() {
   const indexOfLastItem = currentPage * itemsPerPage
   const indexOfFirstItem = indexOfLastItem - itemsPerPage
 
-  const currentProductSize = filteredProductSize.slice(indexOfFirstItem, indexOfLastItem)
-
   const fetchProductSize = async (page = currentPage, limit = itemsPerPage, keyword = searchKeyword) => {
     try {
         const productSizeData = await searchProductSize(keyword, page, limit)
@@ -94,46 +92,46 @@ function ProductSize() {
 }
 
 const goToNextPage = () => {
-if (currentPage < totalPages) {
-  const newPage = currentPage + 1
-  setCurrentPage(newPage)
-  fetchProductSize(newPage, itemsPerPage, searchKeyword)
-}
-}
-
-const goToPage = (pageNumber) => {
-setCurrentPage(pageNumber)
-fetchProductSize(pageNumber, itemsPerPage, searchKeyword)
+  if (currentPage < totalPages) {
+    const newPage = currentPage + 1
+    setCurrentPage(newPage)
+    fetchProductSize(newPage, itemsPerPage, searchKeyword)
+  }
 }
 
-const renderPaginationButtons = () => {
-const pageNumbers = []
-for (let i = 1; i <= totalPages; i++) {
-  pageNumbers.push(i)
-}
-return (
-  <div>
-    <Button color='grey' onClick={goToPreviousPage} disabled={currentPage === 1}>Previous</Button>
-    {pageNumbers.map(number => (
-      <Button
-        key={number}
-        onClick={() => goToPage(number)}
-        disabled={currentPage === number}
-      >
-        {number}
-      </Button>
-    ))}
-    <Button color='purple' onClick={goToNextPage} disabled={currentPage === totalPages}>Next</Button>
-  </div>
-)
-}
+  const goToPage = (pageNumber) => {
+    setCurrentPage(pageNumber)
+    fetchProductSize(pageNumber, itemsPerPage, searchKeyword)
+  }
+
+  const renderPaginationButtons = () => {
+    const pageNumbers = []
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(i)
+    }
+    return (
+      <div>
+        <Button color='grey' onClick={goToPreviousPage} disabled={currentPage === 1}>Previous</Button>
+        {pageNumbers.map(number => (
+          <Button
+            key={number}
+            onClick={() => goToPage(number)}
+            disabled={currentPage === number}
+          >
+            {number}
+          </Button>
+        ))}
+        <Button color='purple' onClick={goToNextPage} disabled={currentPage === totalPages}>Next</Button>
+      </div>
+    )
+  }
   
 
   return (
     <div className='main-container'>
         <div className={`main-container ${showUpdateForm || showAddForm ? 'blur-background' : ''}`}>
             <center>
-                <h2>Quản lí số lượng sản phẩm</h2>  
+                <h2>Quản lý số lượng sản phẩm</h2>  
             </center>
             <div style={{ display: 'flex' ,justifyContent : 'space-between'}}>
                 <div className="row" style={{marginBottom: '20px'}}>
@@ -167,7 +165,7 @@ return (
 
                     <Table.Body>
                         {
-                            currentProductSize.map((item) => {
+                            filteredProductSize.map((item) => {
                                 return (
                                     <Table.Row key={item.id}>
                                         <Table.Cell>{item.id}</Table.Cell>

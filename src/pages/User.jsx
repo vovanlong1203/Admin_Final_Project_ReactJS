@@ -23,8 +23,8 @@ function User() {
     }
 
     const lockUser = async (id) => {
-        const response = await lockUserService(id);
-        if (response.status === 200) {
+        const response = await lockUserService(id)
+        if (response.status == 200) {
             toast.success("Khóa tài khoản thành công!")
             fetchData(currentPage, itemsPerPage, searchKeyword)
         } else {
@@ -102,7 +102,7 @@ function User() {
         <div className='main-container'>
             <div className={`main-container`}>
                 <center>
-                    <h2>Quản lí khách hàng</h2>  
+                    <h2>Quản lý khách hàng</h2>  
                 </center>
                 <div style={{ display: 'flex' ,justifyContent : 'space-between'}}>
                     <div className="row" style={{marginBottom: '20px'}}>
@@ -158,10 +158,10 @@ function User() {
                                     <Table.Cell className="break-word">{item.gmail}</Table.Cell>
                                     <Table.Cell className="break-word">{item.account_provider}</Table.Cell>
                                     <Table.Cell className="break-word">
-                                        {item.is_locked === 0 ? <FaLockOpen /> : <FaLock />}
+                                        {item.is_locked == 0 ? <FaLockOpen /> : <FaLock />}
                                     </Table.Cell>
                                     <Table.Cell>
-                                        {item.is_locked === 0 ? (
+                                        {item.is_locked == 0 ? (
                                             <Button color='red' onClick={() => lockUser(item.user_id)}>
                                                 <FaLock />
                                             </Button>

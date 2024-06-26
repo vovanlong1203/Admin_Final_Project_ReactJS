@@ -60,8 +60,10 @@ function Statistics() {
             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
+            {/* <XAxis dataKey="date" />
+            <YAxis /> */}
+            <XAxis dataKey="date" label={{ value: 'Days', position: 'insideBottom', offset: -10 }} />
+            <YAxis label={{ value: 'Revenue', angle: -90, position: 'insideLeft' }} />
             <Tooltip />
             <Legend />
             <Bar dataKey="revenue" fill="#8884d8" />
